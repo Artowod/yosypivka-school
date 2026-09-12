@@ -1,0 +1,8 @@
+.classIcon {
+  width: 110px;
+  height: 110px;
+  transition: transform 0.3s;
+}
+:global(a):hover .classIcon {
+  transform: rotate(5deg);
+}

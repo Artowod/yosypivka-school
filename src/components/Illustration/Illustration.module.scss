@@ -1,0 +1,17 @@
+.icon {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.moving {
+  transform-origin: center;
+  transition: transform 0.35s ease;
+}
+:global(a):hover .moving,
+:global(button):hover .moving,
+:global(a):focus-visible .moving,
+:global(button):active .moving {
+  transform: rotate(-9deg) translateY(-3px);
+}

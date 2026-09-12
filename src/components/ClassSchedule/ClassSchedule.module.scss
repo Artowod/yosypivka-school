@@ -1,0 +1,150 @@
+.section {
+  scroll-margin-top: 170px;
+}
+.heading {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  > svg {
+    width: 65px;
+    height: 70px;
+  }
+  h2 {
+    margin-bottom: 6px;
+  }
+  p {
+    margin-bottom: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  > button {
+    margin-left: auto;
+  }
+}
+.note {
+  padding: 12px 18px;
+  background: #f7efd7;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #7d704e;
+}
+.days {
+  display: grid;
+  gap: 22px;
+}
+.day {
+  border: 1px solid #dde4de;
+  border-radius: 19px;
+  overflow: hidden;
+  background: #fffef9;
+  h3 {
+    padding: 15px 18px;
+    margin: 0;
+    background: #eaf0e4;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+    > span {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      color: #7c6225;
+      svg {
+        width: 25px;
+        height: 28px;
+      }
+    }
+  }
+  &:nth-child(2n) h3 {
+    background: #e8f1f6;
+  }
+  &:nth-child(3n) h3 {
+    background: #f7e8e8;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead {
+    color: #87928b;
+    font-size: 10px;
+    text-align: left;
+  }
+  th,
+  td {
+    padding: 9px 12px;
+    height: 43px;
+    border-bottom: 1px solid #e5e9e1;
+  }
+  tbody th {
+    width: 106px;
+    font-weight: 650;
+    color: #718579;
+    border-right: 1px solid #d9e6e9;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  td {
+    font-weight: 650;
+  }
+  input {
+    padding: 4px 6px !important;
+    min-height: 30px !important;
+    font-size: 12px !important;
+  }
+  tr:last-child td,
+  tr:last-child th {
+    border-bottom: 0;
+  }
+}
+.today {
+  border: 2px solid #dbb849;
+  box-shadow: 0 4px 22px #e6c15b20;
+  h3 {
+    background: #fbefbd !important;
+  }
+}
+.emptyLesson {
+  color: #b5c0b5;
+}
+.editBar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding-block: 18px;
+  input {
+    width: 180px !important;
+  }
+  span {
+    color: var(--muted);
+    font-size: 12px;
+  }
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (min-width: 768px) {
+  .days {
+    grid-template-columns: 1fr 1fr;
+  }
+  .day {
+    table {
+      font-size: 13px;
+    }
+    th,
+    td {
+      padding: 10px 15px;
+    }
+  }
+}

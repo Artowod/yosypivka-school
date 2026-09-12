@@ -1,0 +1,249 @@
+@use "sass:color";
+:root {
+  --ink: #273e43;
+  --muted: #657878;
+  --paper: #fffdf7;
+  --blue: #246b93;
+  --blue-light: #e7f3f8;
+  --yellow: #f6ce58;
+  --pink: #f7e2e4;
+  --green: #376851;
+  --line: #e3e8df;
+  --radius: 24px;
+  --shadow: 0 12px 35px #2546400a;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px;
+}
+body {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-nunito), "Trebuchet MS", sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button,
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+.button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 20px;
+  background: var(--green);
+  color: white;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+button:hover,
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px #284a4320;
+}
+button:active,
+.button:active {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+button.secondary,
+.button.secondary {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+button.danger {
+  background: #a43c45;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+:focus-visible {
+  outline: 3px solid #d69113;
+  outline-offset: 4px;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.18;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+h1 {
+  font-size: clamp(2.3rem, 5.1vw, 4.5rem);
+}
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+h3 {
+  font-size: 1.3rem;
+}
+input:not([type="checkbox"]),
+textarea,
+select {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid #bacbc5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: white;
+  color: var(--ink);
+}
+input[type="checkbox"] {
+  width: 21px;
+  height: 21px;
+  accent-color: var(--green);
+}
+label {
+  font-weight: 700;
+}
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+figure {
+  margin: 0;
+}
+img {
+  max-width: 100%;
+}
+main {
+  min-height: 65vh;
+}
+.container {
+  width: min(1180px, calc(100% - 36px));
+  margin-inline: auto;
+}
+.section {
+  padding-block: 45px;
+}
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.17em;
+  color: var(--green);
+}
+.muted {
+  color: var(--muted);
+}
+.badge {
+  display: inline-block;
+  background: #f8edc9;
+  color: #695d35;
+  padding: 4px 11px;
+  border-radius: 8px;
+  font-size: 0.73rem;
+  font-weight: 750;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.form {
+  display: grid;
+  gap: 18px;
+}
+.form label {
+  display: grid;
+  gap: 6px;
+}
+.formError {
+  color: #a03038;
+  font-size: 0.85rem;
+}
+.skipLink {
+  position: fixed;
+  left: 12px;
+  top: -70px;
+  z-index: 100;
+  background: white;
+  padding: 12px;
+}
+.skipLink:focus {
+  top: 12px;
+}
+.empty {
+  padding: 38px 20px;
+  text-align: center;
+  background: #f3f5ed;
+  border-radius: var(--radius);
+}
+.empty svg {
+  width: 90px;
+  height: 90px;
+}
+@media (min-width: 768px) {
+  .container {
+    width: min(1180px, calc(100% - 64px));
+  }
+  .section {
+    padding-block: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.linkIcon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.16em;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+a:hover .linkIcon,
+button:hover .linkIcon {
+  transform: translate(2px, -2px);
+}

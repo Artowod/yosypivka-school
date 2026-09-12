@@ -1,0 +1,63 @@
+.modal {
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  width: min(580px, 92vw);
+  max-height: 88dvh;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 30px 100px #172a4740;
+  animation: appear 0.2s ease both;
+  &::backdrop {
+    background: #152e40b8;
+    backdrop-filter: blur(5px);
+    animation: fade 0.2s both;
+  }
+  header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    h2 {
+      font-size: 1.6rem;
+      margin: 0;
+    }
+    button {
+      font-size: 24px;
+    }
+  }
+}
+.content {
+  padding: 22px;
+}
+.wide {
+  width: 88vw;
+  max-width: 1440px;
+}
+.closing {
+  animation: disappear 0.18s both;
+  &::backdrop {
+    animation: fade 0.18s reverse both;
+  }
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+}
+@keyframes disappear {
+  to {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

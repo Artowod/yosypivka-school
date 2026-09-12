@@ -1,0 +1,190 @@
+import { LinkIcon } from "@/components/LinkIcon/LinkIcon";
+import Image from "next/image";
+import Link from "next/link";
+import { Illustration } from "@/components/Illustration/Illustration";
+import { ClassIllustration } from "@/components/ClassIllustration/ClassIllustration";
+import { DemoStory } from "@/components/DemoStory/DemoStory";
+import page from "@/styles/Page.module.scss";
+import styles from "./Home.module.scss";
+export const metadata = { alternates: { canonical: "/" } };
+export default function HomePage() {
+  return (
+    <>
+      <section className={`container ${styles.hero}`}>
+        <div className={styles.heroCopy}>
+          <p className="eyebrow">
+            <span className={styles.smallFlag} /> Вчимося. Дружимо. Зростаємо.
+          </p>
+          <h1>
+            Маленька школа.
+            <br />
+            <span>Великі мрії.</span>
+          </h1>
+          <p>
+            Перші відкриття, справжня дружба та любов до рідного краю. Тут
+            починається велика подорож у світ знань.
+          </p>
+          <div className="actions">
+            <Link className="button" href="/school-life">
+              Познайоммося ближче <LinkIcon />
+            </Link>
+            <Link className={styles.textLink} href="#our-classes">
+              До наших класів <span>↓</span>
+            </Link>
+          </div>
+          <div className={styles.heroNote}>
+            <Illustration kind="sunflower" />
+            <span>
+              З теплом до кожної дитини.
+              <br />
+              <b>З любов’ю до України.</b>
+            </span>
+          </div>
+        </div>
+        <div className={styles.heroVisual}>
+          <div className={styles.photo}>
+            <Image
+              src="/images/school-demo-horizontal.jpg"
+              alt="Моя затишна сільська школа"
+              fill
+              priority
+              sizes="(min-width: 768px) 600px, 92vw"
+            />
+          </div>
+          <div className={styles.photoLabel}>
+            <span className={styles.pin}>⌖</span>
+            <div>
+              <b>Наш маленький світ</b>
+              <small>Йосипівка · Житомирщина</small>
+            </div>
+            <Illustration kind="flag" />
+          </div>
+          <div className={styles.sunDecoration}>
+            <Illustration kind="sunflower" />
+          </div>
+          <div className={styles.bookDecoration}>
+            <Illustration kind="book" />
+          </div>
+          <span className={styles.sparkle}>✧</span>
+        </div>
+      </section>
+      <div className={`container ${styles.values}`}>
+        <div>
+          <Illustration kind="book" />
+          <span>
+            <b>Пізнаємо світ</b>
+            <small>З цікавістю до нового</small>
+          </span>
+        </div>
+        <div>
+          <Illustration kind="sunflower" />
+          <span>
+            <b>Зростаємо разом</b>
+            <small>У колі друзів і підтримки</small>
+          </span>
+        </div>
+        <div>
+          <Illustration kind="flag" />
+          <span>
+            <b>Любимо Україну</b>
+            <small>Починаємо з рідного краю</small>
+          </span>
+        </div>
+      </div>
+      <section id="our-classes" className="container section">
+        <div className={page.sectionTitle}>
+          <div>
+            <p className="eyebrow">Чотири сходинки до великих відкриттів</p>
+            <h2>Кожен клас — маленька родина</h2>
+            <p className="muted">
+              Зазирніть у наші класи: розклад, світлини та шкільні миті.
+            </p>
+          </div>
+        </div>
+        <div className={page.classGrid}>
+          {[
+            "Перші кроки та відкриття",
+            "Щодня дізнаємося більше",
+            "Досліджуємо та творимо",
+            "Мріємо й рушаємо далі",
+          ].map((text, index) => (
+            <Link
+              className={page.classCard}
+              href={`/classes/${index + 1}`}
+              key={text}
+            >
+              <ClassIllustration number={index + 1} />
+
+              <h3>{index + 1} клас</h3>
+              <p>{text}</p>
+              <div className={styles.classCardLink}>
+                <span>Завітати до класу</span>
+
+                <LinkIcon />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+      <section className={styles.lifeSection}>
+        <div className="container">
+          <div className={page.sectionTitle}>
+            <div>
+              <p className="eyebrow">Зберігаємо теплі моменти</p>
+              <h2>Життя за шкільним порогом</h2>
+            </div>
+            <Link href="/school-life">
+              Усе шкільне життя <LinkIcon />
+            </Link>
+          </div>
+          <div className={styles.lifeGrid}>
+            {["Разом навчаємося", "Разом відкриваємо", "Разом пам’ятаємо"].map(
+              (title, index) => (
+                <Link
+                  href={index === 2 ? "/archive" : "/school-life/gallery"}
+                  key={title}
+                  className={styles.lifeCard}
+                >
+                  <div>
+                    <Image
+                      src={`/images/school-demo-${
+                        index === 1 ? "vertical" : "horizontal"
+                      }.jpg`}
+                      alt={`Фото ${index + 1} — демонстраційне зображення`}
+                      fill
+                      sizes="(min-width:768px) 380px, 90vw"
+                    />
+                    <span>Фото {index + 1} · демо</span>
+                  </div>
+                  <section>
+                    <p className="eyebrow">Наші шкільні миті</p>
+                    <h3>
+                      {title} <LinkIcon />
+                    </h3>
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </p>
+                  </section>
+                </Link>
+              ),
+            )}
+          </div>
+        </div>
+      </section>
+      <DemoStory
+        title="Школа, село і спільна історія"
+        eyebrow="Там, де наше коріння"
+      />
+      <div className={`container ${page.callout}`}>
+        <Illustration kind="kalyna" />
+        <div>
+          <h2>Знати своє. Берегти рідне.</h2>
+          <p>Дізнайтеся більше про Йосипівку та історію нашого краю.</p>
+        </div>
+        <Link className="button secondary" href="/history">
+          Наша історія <LinkIcon />
+        </Link>
+      </div>
+    </>
+  );
+}

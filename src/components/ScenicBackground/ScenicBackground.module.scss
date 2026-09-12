@@ -1,0 +1,50 @@
+.background {
+  position: absolute;
+  inset: 0 0 auto;
+  // Keep the image canvas identical across routes, regardless of content height.
+  height: max(100svh, 56.25vw);
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.7), transparent);
+}
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: scenery 80s linear infinite;
+  img {
+    object-fit: cover;
+    object-position: center top;
+  }
+  &:nth-child(2) {
+    animation-delay: -60s;
+  }
+  &:nth-child(3) {
+    animation-delay: -40s;
+  }
+  &:nth-child(4) {
+    animation-delay: -20s;
+  }
+}
+@keyframes scenery {
+  0%,
+  21.25% {
+    opacity: 1;
+  }
+  25%,
+  96.25% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene {
+    animation: none;
+  }
+  .scene:first-child {
+    opacity: 1;
+  }
+}

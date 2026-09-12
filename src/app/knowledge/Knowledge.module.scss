@@ -1,0 +1,135 @@
+.article {
+  margin-block: 26px 50px;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--green);
+  font-weight: 750;
+  margin-bottom: 16px;
+  svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.2s;
+  }
+  &:hover svg {
+    transform: translateX(-4px);
+  }
+}
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 0.8rem;
+  margin-bottom: 24px;
+  a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 24px;
+  padding: 24px;
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    overflow-wrap: anywhere;
+    margin: 0;
+  }
+  svg {
+    width: 70px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+}
+.blue {
+  background: #e2f0f7;
+}
+.pink {
+  background: #f7e4e8;
+}
+.yellow {
+  background: #f8edcd;
+}
+.green {
+  background: #e6efdc;
+}
+.body {
+  margin-top: 26px;
+  padding: 22px;
+  background: #fffdf7ed;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow-wrap: anywhere;
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 32px;
+  }
+  // > p {
+  //   max-width: 85ch;
+  // }
+}
+.source {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 30px;
+  a {
+    text-decoration: underline;
+  }
+}
+
+.color_cube_wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.color_cube {
+  display: inline-block;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 20%;
+  border: 1px solid var(--line);
+  margin-right: 0.5rem;
+}
+
+.red_color_symbolic_cube {
+  background: red;
+}
+
+.green_color_symbolic_cube {
+  background: rgb(0, 172, 0);
+}
+
+.orange_color_symbolic_cube {
+  background: orange;
+}
+
+.blue_color_symbolic_cube {
+  background: rgb(0, 119, 255);
+}
+
+.white_color_symbolic_cube {
+  background: #fff;
+}
+
+@media (min-width: 768px) {
+  .body,
+  .title {
+    padding: 36px;
+  }
+  .title svg {
+    width: 110px;
+    height: 120px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .back svg {
+    transition: none;
+  }
+}
