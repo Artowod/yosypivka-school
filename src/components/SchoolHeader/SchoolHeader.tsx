@@ -22,6 +22,7 @@ const LINKS = [
 export function SchoolHeader() {
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
+  const avatarCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousPath = useRef(pathname);
   useEffect(() => {
     if (previousPath.current === pathname) return;
@@ -52,6 +53,15 @@ export function SchoolHeader() {
   const viewer = useViewer();
   const toast = useToast();
   const actor = viewer.data?.actor;
+  const roleLabel = actor
+    ? [
+        ...(actor.roles.includes("admin") ? ["Адмін"] : []),
+        ...actor.roles
+          .filter((role) => role.startsWith("class_"))
+          .sort()
+          .map((role) => `Вчитель ${role.slice(-1)} класу`),
+      ].join(" · ") || "Гість"
+    : null;
   useEffect(() => {
     const closeOutside = (event: PointerEvent) =>
       document
@@ -74,6 +84,7 @@ export function SchoolHeader() {
     return () => {
       document.removeEventListener("pointerdown", closeOutside);
       document.removeEventListener("keydown", closeEscape);
+      if (avatarCloseTimer.current) clearTimeout(avatarCloseTimer.current);
     };
   }, []);
   return (
@@ -81,10 +92,16 @@ export function SchoolHeader() {
       <div className={styles.topline}>
         <div className="container">
           <span>Брусилівська громада · Житомирщина</span>
-          <span>
-            Зростаємо разом. З любов’ю до України{" "}
-            <span className={styles.flag} />
-          </span>
+          {roleLabel ? (
+            <span className={styles.roleStatus} title={roleLabel}>
+              Статус: <strong>{roleLabel}</strong>
+            </span>
+          ) : (
+            <span className={styles.toplineMessage}>
+              Зростаємо разом. З любов’ю до України{" "}
+              <span className={styles.flag} />
+            </span>
+          )}
         </div>
       </div>
       <div className={`container ${styles.main}`}>
@@ -107,15 +124,25 @@ export function SchoolHeader() {
               <details
                 className={styles.avatar}
                 onPointerEnter={(event) => {
-                  if (event.pointerType === "mouse")
-                    event.currentTarget.open = true;
+                  if (event.pointerType !== "mouse") return;
+                  if (avatarCloseTimer.current)
+                    clearTimeout(avatarCloseTimer.current);
+                  avatarCloseTimer.current = null;
+                  event.currentTarget.open = true;
                 }}
                 onPointerLeave={(event) => {
                   if (
                     event.pointerType === "mouse" &&
                     !event.currentTarget.contains(document.activeElement)
-                  )
-                    event.currentTarget.open = false;
+                  ) {
+                    const avatar = event.currentTarget;
+                    if (avatarCloseTimer.current)
+                      clearTimeout(avatarCloseTimer.current);
+                    avatarCloseTimer.current = setTimeout(() => {
+                      avatar.open = false;
+                      avatarCloseTimer.current = null;
+                    }, 250);
+                  }
                 }}
                 onBlur={(event) => {
                   if (!event.currentTarget.contains(event.relatedTarget))
@@ -132,6 +159,7 @@ export function SchoolHeader() {
                     </b>
                   )}
                   <span>{actor.email}</span>
+                  <span className={styles.profileRole}>Статус: {roleLabel}</span>
                   <button
                     className="secondary"
                     onClick={async () => {

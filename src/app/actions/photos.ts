@@ -17,6 +17,19 @@ import { failure, type ActionResult } from "@/lib/actionResult";
 import { getPhotos } from "@/lib/data";
 import { logError } from "@/lib/logging";
 import type { GalleryId } from "@/lib/constants";
+import type { Photo } from "@/lib/demo";
+const publicPhotoColumns = {
+  id: photos.id,
+  creationDate: photos.creationDate,
+  title: photos.title,
+  description: photos.description,
+  galleryId: photos.galleryId,
+  secureUrl: photos.secureUrl,
+  cloudinaryPublicId: photos.cloudinaryPublicId,
+  width: photos.width,
+  height: photos.height,
+  classId: photos.classId,
+};
 function refreshGallery(gallery: GalleryId) {
   updateTag(`gallery:${gallery}`);
   updateTag("photos:archive");
@@ -35,11 +48,14 @@ export async function readPhotos(query: PhotoQuery) {
     return failure();
   }
 }
-export async function createPhoto(form: FormData): Promise<ActionResult> {
+export async function createPhoto(form: FormData): Promise<ActionResult<Photo>> {
   let uploadedId: string | undefined;
   let committed = false;
+  let actor: Awaited<ReturnType<typeof getActor>> = null;
+  let stage = "authentication";
   try {
-    const actor = await getActor();
+    actor = await getActor();
+    stage = "validation";
     const data = createPhotoSchema.parse({
       galleryId: form.get("galleryId"),
       title: form.get("title"),
@@ -49,9 +65,11 @@ export async function createPhoto(form: FormData): Promise<ActionResult> {
     assertGalleryPermission(actor, data.galleryId);
     const file = form.get("file");
     if (!(file instanceof File)) throw new Error("FILE_REQUIRED");
+    stage = "upload";
     const uploaded = await uploadPhoto(file);
     uploadedId = uploaded.public_id;
-    await withAuthorizedTransaction(actor, async (tx, fresh) => {
+    stage = "database";
+    const createdPhoto = await withAuthorizedTransaction(actor, async (tx, fresh) => {
       assertGalleryPermission(fresh, data.galleryId);
       const [photo] = await tx
         .insert(photos)
@@ -70,7 +88,7 @@ export async function createPhoto(form: FormData): Promise<ActionResult> {
           format: uploaded.format,
           bytes: uploaded.bytes,
         })
-        .returning();
+        .returning(publicPhotoColumns);
       await tx.insert(auditLogs).values({
         userId: fresh.id,
         userEmail: fresh.email,
@@ -80,35 +98,37 @@ export async function createPhoto(form: FormData): Promise<ActionResult> {
         classId: photo.classId,
         summary: "Photo added",
       });
+      return photo;
     });
     committed = true;
+    stage = "revalidation";
     refreshGallery(data.galleryId);
-    return { ok: true, data: undefined };
+    return { ok: true, data: createdPhoto };
   } catch (error) {
     if (uploadedId && !committed) {
       try {
         await destroyPhoto(uploadedId);
       } catch (cleanupError) {
-        await logError("photo.create.cleanup", cleanupError);
+        await logError("photo.create.cleanup", cleanupError, actor);
         try {
           await getDb()
             .insert(assetCleanupJobs)
             .values({ publicId: uploadedId })
             .onConflictDoNothing();
         } catch (queueError) {
-          await logError("photo.create.cleanupQueue", queueError);
+          await logError("photo.create.cleanupQueue", queueError, actor);
         }
       }
     }
-    await logError("photo.create", error);
+    await logError(`photo.create.${stage}`, error, actor);
     return failure();
   }
 }
-export async function editPhoto(input: unknown): Promise<ActionResult> {
+export async function editPhoto(input: unknown): Promise<ActionResult<Photo>> {
   try {
     const actor = await getActor();
     const data = editPhotoSchema.parse(input);
-    const gallery = await withAuthorizedTransaction(
+    const updatedPhoto = await withAuthorizedTransaction(
       actor,
       async (tx, fresh) => {
         const [photo] = await tx
@@ -118,7 +138,7 @@ export async function editPhoto(input: unknown): Promise<ActionResult> {
           .for("update");
         if (!photo) throw new Error("PHOTO_NOT_FOUND");
         assertGalleryPermission(fresh, photo.galleryId);
-        await tx
+        const [updated] = await tx
           .update(photos)
           .set({
             title: data.title,
@@ -126,7 +146,9 @@ export async function editPhoto(input: unknown): Promise<ActionResult> {
             creationDate: data.creationDate,
             updatedAt: new Date(),
           })
-          .where(eq(photos.id, photo.id));
+          .where(eq(photos.id, photo.id))
+          .returning(publicPhotoColumns);
+        if (!updated) throw new Error("PHOTO_UPDATE_FAILED");
         await tx.insert(auditLogs).values({
           userId: fresh.id,
           userEmail: fresh.email,
@@ -136,11 +158,11 @@ export async function editPhoto(input: unknown): Promise<ActionResult> {
           classId: photo.classId,
           summary: "Photo metadata edited",
         });
-        return photo.galleryId;
+        return updated;
       },
     );
-    refreshGallery(gallery);
-    return { ok: true, data: undefined };
+    refreshGallery(updatedPhoto.galleryId);
+    return { ok: true, data: updatedPhoto };
   } catch (error) {
     await logError("photo.edit", error);
     return failure();

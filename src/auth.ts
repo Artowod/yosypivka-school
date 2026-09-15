@@ -6,7 +6,11 @@ import { users, auditLogs } from "@/db/schema";
 import { logError } from "@/lib/logging";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Google],
+  providers: [
+    Google({
+      authorization: { params: { prompt: "select_account consent" } },
+    }),
+  ],
   session: { strategy: "jwt" },
   pages: { signIn: "/login", error: "/login" },
   callbacks: {

@@ -60,9 +60,7 @@
   background: #e3e8df;
   img {
     object-fit: cover;
-    transition:
-      transform 0.35s,
-      filter 0.35s;
+    transition: transform 0.35s, filter 0.35s;
   }
   &:hover {
     transform: none;
@@ -127,7 +125,8 @@
 }
 .lightboxImage {
   position: relative;
-  height: 62dvh;
+  flex: 1 0 min(240px, 42dvh);
+  min-height: min(240px, 42dvh);
   img {
     object-fit: contain;
   }
@@ -136,6 +135,37 @@
     position: relative;
     z-index: 1;
     background: var(--paper);
+  }
+}
+.downloadButton {
+  border: 2px solid #4f9bd2;
+
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  svg {
+    width: 38px;
+    height: 38px;
+  }
+  &:hover,
+  &:focus-visible {
+    transform: translateY(2px);
+    .downloadArrow {
+      transform: translateY(3px);
+    }
+  }
+}
+.downloadArrow {
+  transition: transform 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .downloadButton,
+  .downloadArrow {
+    transition: none;
+  }
+  .downloadButton:hover,
+  .downloadButton:focus-visible,
+  .downloadButton:hover .downloadArrow,
+  .downloadButton:focus-visible .downloadArrow {
+    transform: none;
   }
 }
 .lightboxDate {

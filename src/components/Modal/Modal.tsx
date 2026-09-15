@@ -12,11 +12,17 @@ export function Modal({
   children,
   onClose,
   wide = false,
+  lightbox = false,
+  headerAction,
+  explicitCloseOnly = false,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  lightbox?: boolean;
+  headerAction?: ReactNode;
+  explicitCloseOnly?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
@@ -41,12 +47,14 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={`${styles.modal} ${wide ? styles.wide : ""} ${closing ? styles.closing : ""}`}
+      className={`${styles.modal} ${wide ? styles.wide : ""} ${
+        lightbox ? styles.lightbox : ""
+      } ${closing ? styles.closing : ""}`}
       aria-label={title}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
-          close();
+          if (!explicitCloseOnly) close();
           return;
         }
         if (event.key !== "Tab") return;
@@ -71,23 +79,26 @@ export function Modal({
       }}
       onCancel={(event) => {
         event.preventDefault();
-        close();
+        if (!explicitCloseOnly) close();
       }}
       onClick={(event) => {
-        if (event.target === ref.current) close();
+        if (!explicitCloseOnly && event.target === ref.current) close();
       }}
     >
       <div className={styles.content}>
         <header>
           <h2>{title}</h2>
-          <button
-            className="secondary"
-            type="button"
-            onClick={close}
-            aria-label="Закрити вікно"
-          >
-            ×
-          </button>
+          <div className={styles.headerActions}>
+            {headerAction ? headerAction : <div></div>}
+            <button
+              className="secondary"
+              type="button"
+              onClick={close}
+              aria-label="Закрити вікно"
+            >
+              ×
+            </button>
+          </div>
         </header>
         {children}
       </div>

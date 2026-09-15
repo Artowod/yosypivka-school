@@ -5,6 +5,7 @@ import { PageHero } from "@/components/PageHero/PageHero";
 import { DemoStory } from "@/components/DemoStory/DemoStory";
 import { Illustration } from "@/components/Illustration/Illustration";
 import styles from "@/styles/Page.module.scss";
+import schoolLifePhoto from "../../../public/images/school-life-1.jpg";
 export const metadata = {
   title: "Шкільне життя",
   description:
@@ -24,13 +25,16 @@ export default function SchoolLifePage() {
       <DemoStory
         title="Разом творимо нашу школу"
         eyebrow="Дні, наповнені сенсом"
-        long
+        description="Ми разом навчаємося, відкриваємо нові знання та святкуємо досягнення."
+        img={schoolLifePhoto}
+        imageAlt="Учні та вчителі Йосипівської початкової школи"
       />
       <SchoolTeachers />
       <DemoStory
         title="Наші випуски"
         eyebrow="Пам’ятаємо кожну маленьку історію"
         reverse
+        description="Наші випускники — це частина великої шкільної родини. Ми пам’ятаємо кожну маленьку історію та святкуємо разом."
       />
       <div className={`container ${styles.callout}`}>
         <Illustration kind="camera" />

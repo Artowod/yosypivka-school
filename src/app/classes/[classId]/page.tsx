@@ -26,6 +26,33 @@ export async function generateMetadata({
     alternates: { canonical: `/classes/${classId}` },
   };
 }
+
+const CLASS_DESCRIPTIONS: Record<string, string> = {
+  "1": "Ми - Першачки Йосипівської початкової школи 2026 року. Перший клас - це початок великої подорожі у світ знань. Разом навчаємося, відкриваємо світ і збираємо щасливі спогади. Ми - маленька родина, де кожен день приносить нові відкриття та радість від спільних досягнень.",
+  "2": "Другий клас — це час для нових відкриттів та дружніх пригод. Ми разом досліджуємо світ, розвиваємо навички та святкуємо досягнення.",
+  "3": "Третій клас — це етап, коли ми стаємо більш самостійними та впевненими. Разом ми вчимося, творимо та підтримуємо один одного.",
+  "4": "Четвертий клас — це час підготовки до нових викликів та великих звершень. Ми разом навчаємося, відкриваємо світ і збираємо щасливі спогади",
+};
+const CLASS_PHOTO_MAIN_SIZES: Record<
+  string,
+  { width: number; height: number }
+> = {
+  "1": { width: 1379, height: 845 },
+  "2": { width: 949, height: 720 },
+  "3": { width: 949, height: 720 },
+  "4": { width: 949, height: 720 },
+};
+
+const CLASS_PHOTO_LIFE_SIZES: Record<
+  string,
+  { width: number; height: number }
+> = {
+  "1": { width: 949, height: 720 },
+  "2": { width: 949, height: 720 },
+  "3": { width: 949, height: 720 },
+  "4": { width: 949, height: 720 },
+};
+
 export default async function ClassPage({
   params,
 }: {
@@ -62,6 +89,10 @@ export default async function ClassPage({
         title="Знайомтеся — це ми!"
         eyebrow={`${id} клас · наша спільна історія`}
         long
+        img={`/images/school-${id}-class-main.jpg`}
+        description={CLASS_DESCRIPTIONS[classId]}
+        imageWidth={CLASS_PHOTO_MAIN_SIZES[classId].width}
+        imageHeight={CLASS_PHOTO_MAIN_SIZES[classId].height}
       />
       {schedule ? (
         <ClassSchedule classId={id} initialWeek={week} initialData={schedule} />
@@ -76,6 +107,9 @@ export default async function ClassPage({
         title="Кожен день — нова пригода"
         eyebrow="Навчання, творчість і дружба"
         reverse
+        img={`/images/school-${id}-class-life.jpg`}
+        imageWidth={CLASS_PHOTO_LIFE_SIZES[classId].width}
+        imageHeight={CLASS_PHOTO_LIFE_SIZES[classId].height}
       />
       <div className={`container ${styles.callout}`}>
         <Illustration kind="camera" />

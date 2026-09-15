@@ -65,13 +65,8 @@
 }
 .storyPhoto,
 .verticalPhoto {
-  position: relative;
-  min-height: 290px;
   border-radius: 24px;
   overflow: hidden;
-  img {
-    object-fit: cover;
-  }
   figcaption {
     position: absolute;
     bottom: 14px;
@@ -83,8 +78,10 @@
     color: #5d6c60;
   }
 }
-.verticalPhoto {
-  min-height: 450px;
+.storyImage {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .sectionTitle {
   display: flex;
@@ -115,9 +112,7 @@
   border-radius: 22px;
   padding: 24px 20px;
   background: #f9f5e7;
-  transition:
-    transform 0.25s,
-    box-shadow 0.25s;
+  transition: transform 0.25s, box-shadow 0.25s;
   &:nth-child(2) {
     background: #edf5f7;
   }
@@ -297,9 +292,6 @@
   .reverse > figure {
     order: 2;
   }
-  .storyPhoto {
-    min-height: 380px;
-  }
   .classGrid {
     grid-template-columns: repeat(4, 1fr);
     gap: 22px;
@@ -324,4 +316,25 @@
   .people {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+@media (min-width: 1024px) {
+  .story {
+    grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.8fr);
+    gap: 56px;
+  }
+  .story.reverse {
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.7fr);
+  }
+}
+
+.emptyImgFrame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 290px;
+  border-radius: 24px;
+  background: #f9f9d6;
+  border: 2px solid #a5ddfe;
 }

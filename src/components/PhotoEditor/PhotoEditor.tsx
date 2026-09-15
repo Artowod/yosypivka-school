@@ -21,7 +21,10 @@ export function PhotoEditor({
   photo?: Photo;
   galleryId: GalleryId;
   onClose: () => void;
-  onSaved: () => Promise<void>;
+  onSaved: (change: {
+    type: "created" | "updated";
+    photo: Photo;
+  }) => Promise<void>;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const toast = useToast();
@@ -59,7 +62,10 @@ export function PhotoEditor({
         result = await createPhoto(payload);
       }
       if (!result.ok) throw new Error("SAVE_FAILED");
-      await onSaved();
+      await onSaved({
+        type: photo ? "updated" : "created",
+        photo: result.data,
+      });
       toast(photo ? "Підпис до фотографії оновлено!" : "Нову світлину додано!");
       onClose();
     } catch {
@@ -70,6 +76,7 @@ export function PhotoEditor({
     <Modal
       title={photo ? "Редагувати підпис" : "Додати світлину"}
       onClose={onClose}
+      explicitCloseOnly
     >
       <form className="form" onSubmit={submit}>
         <fieldset className="form" disabled={form.formState.isSubmitting}>

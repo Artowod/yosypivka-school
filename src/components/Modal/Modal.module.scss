@@ -14,6 +14,7 @@
     animation: fade 0.2s both;
   }
   header {
+    width: 100%;
     display: flex;
     gap: 16px;
     align-items: center;
@@ -31,9 +32,57 @@
 .content {
   padding: 22px;
 }
+.headerActions {
+  position: absolute;
+  right: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  flex: none;
+}
 .wide {
   width: 88vw;
   max-width: 1440px;
+}
+.lightbox {
+  width: 95vw;
+  max-width: 95vw;
+  height: 95dvh;
+  max-height: 95dvh;
+  .content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding: clamp(12px, 2vw, 22px);
+  }
+  header {
+    align-items: flex-start;
+    margin-bottom: 22px;
+    h2 {
+      padding-top: 8px;
+      overflow-wrap: anywhere;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+    }
+  }
+  .headerActions > button,
+  .headerActions > a {
+    display: grid;
+    place-items: center;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    border-radius: 0;
+  }
+  .headerActions > button {
+    border-top-right-radius: 20px;
+    font-size: 30px;
+  }
+}
+.headerActions > button {
+  border-top-right-radius: 20px;
+  padding: 5px 15px;
+  // font-size: 34px;
 }
 .closing {
   animation: disappear 0.18s both;

@@ -291,9 +291,15 @@ describe("gallery writes and shared Archive", () => {
     }
   });
   it("reports upload failure without fake gallery records", async () => {
-    state.uploaded.mockRejectedValueOnce(new Error("provider failed"));
+    const providerError = { http_code: 401, message: "provider failed" };
+    state.uploaded.mockRejectedValueOnce(providerError);
     expect((await createPhoto(uploadForm())).ok).toBe(false);
     expect(await db.select().from(schema.photos)).toHaveLength(0);
+    expect(state.logs).toHaveBeenCalledWith(
+      "photo.create.upload",
+      providerError,
+      teacher,
+    );
   });
 });
 describe("administration", () => {

@@ -80,7 +80,7 @@ export function WeatherWidget() {
         <div>
           {data.daily.time.map((date, index) => (
             <div key={date}>
-              <small>{formatDate(date, { weekday: "short" })}</small>
+              <small>{formatDate(date, { weekday: "long" })}</small>
               <WeatherIcon
                 code={data.daily.weather_code[index]}
                 description={data.daily.condition_text?.[index]}

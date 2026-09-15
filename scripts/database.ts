@@ -10,7 +10,7 @@ if (!process.env.DATABASE_URL)
   );
 neonConfig.webSocketConstructor = ws;
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL,
   max: 2,
 });
 export const db = drizzle(pool, { schema, casing: "snake_case" });

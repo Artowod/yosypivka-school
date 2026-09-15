@@ -265,6 +265,15 @@
   }
 }
 
+@media (min-width: 1024px) {
+  .photo {
+    box-sizing: content-box;
+    width: calc(100% - 16px);
+    height: auto;
+    aspect-ratio: 4080 / 2296;
+  }
+}
+
 @media (min-width: 768px) and (max-width: 1120px) {
   .classCardLink {
     display: block;

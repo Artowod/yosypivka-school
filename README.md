@@ -14,12 +14,43 @@ npm run dev
 
 ## Підключення сервісів
 
-1. Скопіюйте `.env.example` у `.env.local` та заповніть значення локально. Не публікуйте цей файл.
-2. Створіть Neon Postgres. `DATABASE_URL` — серверний PostgreSQL connection string. Застосуйте `npm run db:migrate`.
+1. Якщо `.env.local` ще немає, скопіюйте `.env.example` у `.env.local` та заповніть значення локально. Наявний файл не перезаписуйте: у ньому вже можуть бути робочі ключі й підключення. Не публікуйте цей файл.
+2. Створіть Neon Postgres.
+
+Set up this Neon project in the current working directory.
+
+    1. `npm i -g neon@latest && neon login`
+    2. `neon skills -y`
+    3. `neon mcp -y`
+    4. `neon link --project-id dawn-river-12148537 --branch production -y`
+    5. `neon config init`
+    6. Update `neon.ts`:
+
+    ```ts
+    import { defineConfig } from "@neon/config/v1";
+
+    export default defineConfig({});
+    ```
+
+    7. `neon deploy`
+
+
+
+ `DATABASE_URL` — pooled-підключення сайту. `DATABASE_URL_UNPOOLED` — пряме підключення для міграцій і службових команд Drizzle; якщо його немає, використовується `DATABASE_URL`. Застосуйте `npm run db:migrate`.
 3. Для розробки запустіть `npm run db:seed`: створюються рівно чотири класи, шість часових слотів, початковий поточний тиждень, 160 спільних демо-записів фотографій і два користувачі з ТЗ. Повторний seed не перезаписує існуючі ролі або розклади. Записи користувачів стають видимими в адмін-кабінеті після справжнього Google-входу.
 4. Налаштуйте Google OAuth web application: callback `http://localhost:3000/api/auth/callback/google`, для production — `https://ваш-домен/api/auth/callback/google`. Заповніть `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`; створіть `AUTH_SECRET` командою `openssl rand -base64 32`.
 5. У Cloudinary заповніть `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. Дозволений домен Next Image обмежений вашим cloud name. Після зміни змінних перезапустіть або перебудуйте застосунок.
 6. `SITE_URL` — канонічна адреса production для metadata, sitemap та robots. У локальному режимі використовується localhost.
+
+### Виконане підключення Neon — 12 вересня 2026
+
+- Поточний каталог прив’язано до проєкту `dawn-river-12148537`, гілка `production`; локальний контекст — `.neon`.
+- Neon CLI авторизовано, офіційні Neon skills встановлено в `.agents/skills`, MCP для Codex налаштовано в `.codex/config.toml` та обмежено цим Neon-проєктом.
+- `neon.ts` містить `defineConfig({})`. `neon config plan` та `neon deploy` підтвердили використання тільки PostgreSQL без змін додаткових сервісів. Ця команда не публікує Next.js-сайт.
+- Параметри підключення вже записані в `.env.local`. `.env.local`, `.neon` та `.codex/config.toml` виключені з Git; MCP-конфігурація містить приватний ключ.
+- Наявну міграцію Drizzle перевірено на тимчасовій гілці й застосовано до `production`: створено дев’ять таблиць. Тимчасову гілку видалено. Development seed не запускався; користувачів, фото й розкладів у базі ще немає.
+- 14 вересня 2026 після підтвердженого Google-входу `myjavaname@gmail.com` виконано початкове налаштування production-бази: додано роль `admin`, чотири класи та шість часових слотів із записом аудиту. Development seed із демо-фото й розкладами не запускався. На хостингу production-змінні потрібно додати окремо.
+- Для встановлення/оновлення `neon skills` поточна утиліта вимагає Node.js ≥22.20; версія Node.js самого сайту не змінена.
 
 Вхід через Google з підтвердженим email створює користувача без ролей. Фіксованого allowlist немає. Кожна мутація читає актуальні ролі з БД, перевіряє конкретний клас/запис, валідовує Zod, зберігає аудит і перевіряє кеш. Публічний layout не читає сесію: окремий клієнтський запит завантажує лише потрібні дані поточного користувача.
 
@@ -45,6 +76,18 @@ npm run db:bootstrap -- your-verified-email@example.com
 ## Узгоджене видалення й технічне обслуговування
 
 Видалення фото спочатку записує запит у `asset_cleanup_jobs`, потім видаляє Cloudinary-файл і транзакційно запис/метадані та job. Якщо сервіс відмовляє, користувач отримує помилку, а durable job залишається для повторення. Невдале створення після успішного upload намагається прибрати новий asset і фіксує cleanup failure окремо.
+
+Помилки зберігаються в Neon `error_logs`, успішні зміни — в `audit_logs`. У Neon SQL Editor останні помилки завантаження фото можна переглянути так:
+
+```sql
+SELECT created_at, user_email, location, error_code
+FROM error_logs
+WHERE location LIKE 'photo.create%'
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+`photo.create.upload` позначає помилку на етапі Cloudinary, `photo.create.database` — під час запису метаданих, `HTTP_401` — відмову провайдера в авторизації. Сирі повідомлення Cloudinary, ключі та вміст фото в логах не зберігаються. Якщо сама БД недоступна, коротке повідомлення потрапляє в stderr серверного процесу.
 
 ```sh
 npm run db:cleanup

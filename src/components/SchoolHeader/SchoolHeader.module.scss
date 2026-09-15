@@ -13,10 +13,28 @@
   padding: 5px 0;
   :global(.container) {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 8px;
+    > span:first-child {
+      min-width: 0;
+    }
   }
-  span:last-child {
+  .toplineMessage {
     display: none;
+  }
+}
+.roleStatus {
+  display: block;
+  flex: 0 1 48%;
+  min-width: 0;
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  strong {
+    color: var(--green);
   }
 }
 .flag {
@@ -168,7 +186,18 @@
     box-shadow: var(--shadow);
     width: min(310px, 85vw);
     overflow-wrap: anywhere;
+    &::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: -12px;
+      height: 12px;
+    }
   }
+}
+.profileRole {
+  color: var(--green);
+  font-weight: 800;
 }
 .adminLink {
   font-size: 12px;
@@ -178,7 +207,7 @@
 @media (min-width: 768px) {
   .topline {
     font-size: 11px;
-    span:last-child {
+    .toplineMessage {
       display: inline;
     }
   }

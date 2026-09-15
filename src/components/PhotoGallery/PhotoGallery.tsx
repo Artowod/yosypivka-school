@@ -1,7 +1,11 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useSearchParams } from "next/navigation";
 import { readPhotos, deletePhoto } from "@/app/actions/photos";
@@ -9,7 +13,8 @@ import { canEditGallery } from "@/lib/permissions";
 import { GALLERIES, FRIENDLY_ERROR, type GalleryId } from "@/lib/constants";
 import type { Photo } from "@/lib/demo";
 import type { PhotoBatch } from "@/lib/data";
-import { photoUrl } from "@/lib/images";
+import { updateCachedPhotos, type PhotoChange } from "@/lib/photoCache";
+import { originalDownloadUrl, photoUrl } from "@/lib/images";
 import { formatDate } from "@/lib/dates";
 import { useViewer, useToast } from "../Providers/Providers";
 import { Modal } from "../Modal/Modal";
@@ -50,7 +55,7 @@ export function PhotoGallery({
   const [width, setWidth] = useState(0);
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<Photo | null>(null);
-  const [editor, setEditor] = useState<Photo | "new" | null>(null);
+  const [editor, setEditor] = useState<Photo | GalleryId | null>(null);
   const [deleting, setDeleting] = useState<Photo | null>(null);
   const [busy, setBusy] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
@@ -59,12 +64,20 @@ export function PhotoGallery({
   const viewer = useViewer();
   const queryClient = useQueryClient();
   const actor = viewer.data?.actor ?? null;
+  const createGallery = galleryId ?? (archive ? selectedGallery : undefined);
   const columns = width
     ? Math.max(2, Math.min(8, Math.floor(width / (width < 600 ? 140 : 190))))
     : 2;
   const limit = width >= 650 ? 50 : 10;
+  const photoQueryKey = [
+    "photos",
+    selectedGallery ?? "all",
+    year,
+    month,
+    limit,
+  ] as const;
   const query = useInfiniteQuery({
-    queryKey: ["photos", selectedGallery ?? "all", year, month],
+    queryKey: photoQueryKey,
     initialPageParam: undefined as PhotoBatch["nextCursor"],
     queryFn: async ({ pageParam }) => {
       const result = await readPhotos({
@@ -79,7 +92,7 @@ export function PhotoGallery({
     },
     getNextPageParam: (last) => last.nextCursor,
     initialData:
-      !year && !month && selectedGallery === galleryId
+      limit === 10 && !year && !month && selectedGallery === galleryId
         ? { pages: [initialData], pageParams: [undefined] }
         : undefined,
   });
@@ -165,8 +178,28 @@ export function PhotoGallery({
     observer.observe(element);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
-  async function refresh() {
-    await queryClient.invalidateQueries({ queryKey: ["photos"] });
+  function belongsToCurrentFilter(photo: Photo) {
+    const photoYear = Number(photo.creationDate.slice(0, 4));
+    const photoMonth = Number(photo.creationDate.slice(5, 7));
+    return (
+      (!selectedGallery || photo.galleryId === selectedGallery) &&
+      (!year || photoYear === year) &&
+      (!month || photoMonth === month)
+    );
+  }
+  async function refresh(change: PhotoChange) {
+    queryClient.setQueryData<InfiniteData<PhotoBatch>>(
+      photoQueryKey,
+      (cached) => updateCachedPhotos(cached, change, belongsToCurrentFilter),
+    );
+    setSelected((photo) =>
+      photo?.id === change.photo.id
+        ? change.type === "deleted"
+          ? null
+          : change.photo
+        : photo,
+    );
+    queryClient.removeQueries({ queryKey: ["photos"], type: "inactive" });
   }
   function setFilter(name: string, value: string) {
     const params = new URLSearchParams(search.toString());
@@ -292,15 +325,18 @@ export function PhotoGallery({
         {query.data?.pages[0].demo && (
           <span className="badge">Демонстраційні фотографії</span>
         )}
-        {galleryId && canEditGallery(actor, galleryId) && (
+        {createGallery && canEditGallery(actor, createGallery) && (
           <button
             onClick={(event) => {
               event.currentTarget.focus();
-              setEditor("new");
+              setEditor(createGallery);
             }}
           >
             ＋ Додати світлину
           </button>
+        )}
+        {archive && actor?.roles.includes("admin") && !selectedGallery && (
+          <span>Щоб додати світлину, оберіть галерею у фільтрі.</span>
         )}
       </div>
       {query.isPending && <Loader />}
@@ -383,13 +419,56 @@ export function PhotoGallery({
         )}
       </div>
       {selected && (
-        <Modal title={selected.title} wide onClose={() => setSelected(null)}>
+        <Modal
+          title={selected.title}
+          lightbox
+          onClose={() => setSelected(null)}
+          headerAction={
+            <a
+              className={styles.downloadButton}
+              href={originalDownloadUrl(selected)}
+              download={`photo-${selected.id}.jpg`}
+              aria-label={`Завантажити оригінал фото «${selected.title}»`}
+              title="Завантажити оригінал"
+            >
+              <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <path
+                  d="M11 31v7a3 3 0 0 0 3 3h20a3 3 0 0 0 3-3v-7"
+                  stroke="#a0a8ef"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M14 36h20"
+                  stroke="#f4bd43"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+                <g className={styles.downloadArrow}>
+                  <path
+                    d="M24 7v22"
+                    stroke="#4f9bd2"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="m16 22 8 8 8-8"
+                    stroke="#6aa76b"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </svg>
+            </a>
+          }
+        >
           <div className={styles.lightboxImage}>
             <Image
               src={photoUrl(selected, true)}
               alt={selected.title}
               fill
-              sizes="88vw"
+              sizes="(max-width: 640px) 90vw, 92vw"
               onLoad={() => setImageLoading(false)}
               onError={() => {
                 setImageLoading(false);
@@ -414,8 +493,8 @@ export function PhotoGallery({
       )}
       {editor && (
         <PhotoEditor
-          photo={editor === "new" ? undefined : editor}
-          galleryId={editor === "new" ? galleryId! : editor.galleryId}
+          photo={typeof editor === "string" ? undefined : editor}
+          galleryId={typeof editor === "string" ? editor : editor.galleryId}
           onClose={() => setEditor(null)}
           onSaved={refresh}
         />
@@ -423,6 +502,7 @@ export function PhotoGallery({
       {deleting && (
         <Modal
           title="Видалити світлину?"
+          explicitCloseOnly
           onClose={() => {
             if (!busy) setDeleting(null);
           }}
@@ -443,7 +523,7 @@ export function PhotoGallery({
                     confirmed: true,
                   });
                   if (!result.ok) throw new Error("DELETE_FAILED");
-                  await refresh();
+                  await refresh({ type: "deleted", photo: deleting });
                   setDeleting(null);
                   toast("Світлину видалено.");
                 } catch {
@@ -460,7 +540,7 @@ export function PhotoGallery({
               disabled={busy}
               onClick={() => setDeleting(null)}
             >
-              Залишити фото
+              Скасувати
             </button>
           </div>
           {busy && <Loader />}

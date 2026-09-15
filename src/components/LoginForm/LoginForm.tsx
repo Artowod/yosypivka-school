@@ -16,7 +16,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
   }, [hasError, toast]);
   return (
     <div className="container section empty">
-      <h2>Раді бачити вас знову</h2>
+      <h2>Раді вас бачити</h2>
       <p>
         Увійдіть через свій Google-акаунт.
         <br />

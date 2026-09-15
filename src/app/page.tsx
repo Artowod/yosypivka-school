@@ -3,11 +3,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { Illustration } from "@/components/Illustration/Illustration";
 import { ClassIllustration } from "@/components/ClassIllustration/ClassIllustration";
-import { DemoStory } from "@/components/DemoStory/DemoStory";
 import page from "@/styles/Page.module.scss";
 import styles from "./Home.module.scss";
 export const metadata = { alternates: { canonical: "/" } };
 export default function HomePage() {
+  const moments_titles = [
+    "Разом навчаємося",
+    "Разом відкриваємо",
+    "Разом святкуємо",
+  ];
+  const moments_descriptions = [
+    "Ми разом пізнаємо світ, відкриваємо нові знання та навички.",
+    "Разом досліджуємо, експериментуємо і за це отримуємо нагороди.",
+    "Ми разом святкуємо досягнення та пам’ятаємо важливі моменти.",
+  ];
   return (
     <>
       <section className={`container ${styles.hero}`}>
@@ -26,7 +35,7 @@ export default function HomePage() {
           </p>
           <div className="actions">
             <Link className="button" href="/school-life">
-              Познайоммося ближче <LinkIcon />
+              Познайомимось ближче <LinkIcon />
             </Link>
             <Link className={styles.textLink} href="#our-classes">
               До наших класів <span>↓</span>
@@ -44,11 +53,11 @@ export default function HomePage() {
         <div className={styles.heroVisual}>
           <div className={styles.photo}>
             <Image
-              src="/images/school-demo-horizontal.jpg"
+              src="/images/school-main-1.jpg"
               alt="Моя затишна сільська школа"
               fill
               priority
-              sizes="(min-width: 768px) 600px, 92vw"
+              sizes="(min-width: 768px) 600px, 98vw"
             />
           </div>
           <div className={styles.photoLabel}>
@@ -131,50 +140,40 @@ export default function HomePage() {
           <div className={page.sectionTitle}>
             <div>
               <p className="eyebrow">Зберігаємо теплі моменти</p>
-              <h2>Життя за шкільним порогом</h2>
+              <h2>Шкільне життя як на долоні</h2>
             </div>
             <Link href="/school-life">
               Усе шкільне життя <LinkIcon />
             </Link>
           </div>
           <div className={styles.lifeGrid}>
-            {["Разом навчаємося", "Разом відкриваємо", "Разом пам’ятаємо"].map(
-              (title, index) => (
-                <Link
-                  href={index === 2 ? "/archive" : "/school-life/gallery"}
-                  key={title}
-                  className={styles.lifeCard}
-                >
-                  <div>
-                    <Image
-                      src={`/images/school-demo-${
-                        index === 1 ? "vertical" : "horizontal"
-                      }.jpg`}
-                      alt={`Фото ${index + 1} — демонстраційне зображення`}
-                      fill
-                      sizes="(min-width:768px) 380px, 90vw"
-                    />
-                    <span>Фото {index + 1} · демо</span>
-                  </div>
-                  <section>
-                    <p className="eyebrow">Наші шкільні миті</p>
-                    <h3>
-                      {title} <LinkIcon />
-                    </h3>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    </p>
-                  </section>
-                </Link>
-              ),
-            )}
+            {moments_titles.map((title, index) => (
+              <Link
+                href={"/school-life/gallery"}
+                key={title}
+                className={styles.lifeCard}
+              >
+                <div>
+                  <Image
+                    src={`/images/school-moments-${index + 1}.jpg`}
+                    alt={`Фото ${index + 1} — моменти шкільного життя`}
+                    fill
+                    sizes="(min-width:768px) 380px, 90vw"
+                  />
+                </div>
+                <section>
+                  <p className="eyebrow">Наші шкільні миті</p>
+                  <h3>
+                    {title} <LinkIcon />
+                  </h3>
+                  <p>{moments_descriptions[index]}</p>
+                </section>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
-      <DemoStory
-        title="Школа, село і спільна історія"
-        eyebrow="Там, де наше коріння"
-      />
+
       <div className={`container ${page.callout}`}>
         <Illustration kind="kalyna" />
         <div>
