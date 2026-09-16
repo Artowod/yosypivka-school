@@ -175,7 +175,7 @@
   max-width: 80px;
   line-height: 1.3;
 }
-@media (min-width: 768px) {
+@media (min-width: 769px) {
   .topline {
     font-size: 11px;
     span:last-child {
@@ -233,6 +233,7 @@
   .weather {
     display: block;
     position: relative;
+    z-index: 2;
     summary {
       cursor: pointer;
       list-style: none;
@@ -305,12 +306,13 @@
     }
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .weather {
     display: block;
     position: absolute;
     top: 0;
     right: 18px;
+    z-index: 2;
     font-size: 11px;
     summary {
       cursor: pointer;
@@ -319,13 +321,17 @@
       gap: 5px;
     }
   }
+  .weather[open] {
+    z-index: 40;
+  }
   .forecast {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
+    z-index: 1;
     background: white;
     padding: 18px;
-    width: 330px;
+    width: min(330px, calc(100vw - 36px));
     border-radius: 15px;
     box-shadow: var(--shadow);
     > div {

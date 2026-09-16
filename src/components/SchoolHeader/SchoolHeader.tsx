@@ -39,7 +39,7 @@ export function SchoolHeader() {
     const measure = () => {
       const nav = header.querySelector("nav");
       const upperHeight =
-        window.innerWidth >= 768
+        window.innerWidth >= 769
           ? nav?.offsetTop ?? 0
           : header.firstElementChild?.getBoundingClientRect().height ?? 0;
       header.style.setProperty("--header-offset", `${upperHeight}px`);

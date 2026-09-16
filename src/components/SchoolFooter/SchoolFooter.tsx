@@ -57,11 +57,6 @@ export function SchoolFooter() {
           >
             Сайт громади <LinkIcon />
           </a>
-          <p className="muted">
-            Соціальні сторінки школи
-            <br />
-            з’являться тут згодом.
-          </p>
         </div>
       </div>
       <div className={`container ${styles.footerBottom}`}>

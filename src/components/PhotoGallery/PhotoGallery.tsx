@@ -23,6 +23,9 @@ import { Illustration } from "../Illustration/Illustration";
 import { FilterSelect } from "../FilterSelect/FilterSelect";
 import { PhotoEditor } from "../PhotoEditor/PhotoEditor";
 import styles from "./PhotoGallery.module.scss";
+
+const PHOTO_QUERY_CACHE_TIME = 60 * 60 * 1000;
+
 export function PhotoGallery({
   galleryId,
   initialData,
@@ -95,6 +98,10 @@ export function PhotoGallery({
       limit === 10 && !year && !month && selectedGallery === galleryId
         ? { pages: [initialData], pageParams: [undefined] }
         : undefined,
+    staleTime: PHOTO_QUERY_CACHE_TIME,
+    gcTime: PHOTO_QUERY_CACHE_TIME,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const items = useMemo(() => {
     const seen = new Set<string>();
