@@ -1,13 +1,14 @@
 import { PageHero } from "@/components/PageHero/PageHero";
 import { KnowledgeAccordion } from "@/components/KnowledgeAccordion/KnowledgeAccordion";
 import { KNOWLEDGE_GROUPS } from "@/lib/knowledge";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "База знань нашого закладу",
   description:
     "Відомості про Йосипівську початкову школу, організація навчального процесу та відкриті документи закладу.",
-  alternates: { canonical: "/knowledge" },
-};
+  path: "/knowledge",
+});
 
 export default function KnowledgePage() {
   return (

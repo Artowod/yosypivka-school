@@ -3,14 +3,15 @@ import { LinkIcon } from "@/components/LinkIcon/LinkIcon";
 import { PageHero } from "@/components/PageHero/PageHero";
 import { Illustration } from "@/components/Illustration/Illustration";
 import styles from "@/styles/Page.module.scss";
+import { createPageMetadata } from "@/lib/seo";
 const PLAN =
   "https://oda.ztmbk.gov.ua/upload/docs/gen-plany/50/2020-12-03/1204296_1606989712.pdf";
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Історія нашої школи та села",
   description:
     "Перевірені відомості про Йосипівку, Брусилівський край та місцеву початкову школу з посиланнями на відкриті джерела.",
-  alternates: { canonical: "/history" },
-};
+  path: "/history",
+});
 export default function HistoryPage() {
   return (
     <>

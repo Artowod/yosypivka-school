@@ -22,11 +22,11 @@ export function PageHero({
 }) {
   return (
     <div className={`container ${styles.pageHero} ${styles[mood]}`}>
-      <div className={styles.breadcrumb}>
+      <nav aria-label="Навігаційний шлях" className={styles.breadcrumb}>
         <Link href="/">Головна</Link>
-        <span> / </span>
-        <span>{title}</span>
-      </div>
+        <span aria-hidden="true"> / </span>
+        <span aria-current="page">{title}</span>
+      </nav>
       <div className={styles.pageHeroInner}>
         <div>
           <p className="eyebrow">{eyebrow}</p>

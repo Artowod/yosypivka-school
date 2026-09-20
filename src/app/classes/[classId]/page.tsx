@@ -9,6 +9,7 @@ import { getSchedule } from "@/lib/data";
 import { weekStart } from "@/lib/dates";
 import { CLASS_IDS } from "@/lib/constants";
 import { logError } from "@/lib/logging";
+import { createPageMetadata } from "@/lib/seo";
 import styles from "@/styles/Page.module.scss";
 export const revalidate = 60;
 export function generateStaticParams() {
@@ -20,11 +21,14 @@ export async function generateMetadata({
   params: Promise<{ classId: string }>;
 }) {
   const { classId } = await params;
-  return {
+  if (!CLASS_IDS.includes(Number(classId) as (typeof CLASS_IDS)[number])) {
+    return { title: "Сторінку не знайдено", robots: { index: false } };
+  }
+  return createPageMetadata({
     title: `${classId} клас`,
     description: `Розклад занять, знайомство та галерея ${classId} класу Йосипівської початкової школи.`,
-    alternates: { canonical: `/classes/${classId}` },
-  };
+    path: `/classes/${classId}`,
+  });
 }
 
 const CLASS_DESCRIPTIONS: Record<string, string> = {

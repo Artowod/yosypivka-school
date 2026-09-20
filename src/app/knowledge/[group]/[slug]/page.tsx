@@ -5,6 +5,7 @@ import { KnowledgeMaterials } from "@/components/KnowledgeMaterials/KnowledgeMat
 import { KNOWLEDGE_CONTENT } from "@/content/knowledge";
 import { publicKnowledgePages, type KnowledgeContent } from "@/lib/knowledge";
 import styles from "../../Knowledge.module.scss";
+import { createPageMetadata } from "@/lib/seo";
 
 // Only published paths from generateStaticParams are routable. Reject other
 // paths before streaming starts so they return HTTP 404 rather than a soft 404.
@@ -22,12 +23,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
   const { group, slug } = await params;
   const entry = resolve(group, slug);
-  if (!entry) return { title: "Сторінку не знайдено" };
-  return {
+  if (!entry) {
+    return { title: "Сторінку не знайдено", robots: { index: false } };
+  }
+  return createPageMetadata({
     title: entry.page.title,
     description: `${entry.page.title}. ${entry.group.title} — база знань Йосипівської початкової школи.`,
-    alternates: { canonical: `/knowledge/${group}/${slug}` },
-  };
+    path: `/knowledge/${group}/${slug}`,
+  });
 }
 export default async function KnowledgeArticle({ params }: Props) {
   const { group, slug } = await params;
@@ -59,7 +62,6 @@ export default async function KnowledgeArticle({ params }: Props) {
         <span aria-current="page">{entry.page.title}</span>
       </nav>
       <header className={`${styles.title} ${styles[entry.group.color]}`}>
-        <> {console.log("entry", entry.group.color)}</>
         <h1>{entry.page.title}</h1>
         <Illustration kind={entry.group.illustration} />
       </header>

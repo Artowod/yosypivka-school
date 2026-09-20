@@ -6,12 +6,14 @@ import { DemoStory } from "@/components/DemoStory/DemoStory";
 import { Illustration } from "@/components/Illustration/Illustration";
 import styles from "@/styles/Page.module.scss";
 import schoolLifePhoto from "../../../public/images/school-life-1.jpg";
-export const metadata = {
+import { createPageMetadata } from "@/lib/seo";
+
+export const metadata = createPageMetadata({
   title: "Шкільне життя",
   description:
     "Знайомство зі школою, вчителями, шкільними активностями та випусками Йосипівської початкової школи.",
-  alternates: { canonical: "/school-life" },
-};
+  path: "/school-life",
+});
 export default function SchoolLifePage() {
   return (
     <>

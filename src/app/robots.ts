@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -6,8 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin", "/login", "/api/"],
     },
-    sitemap: process.env.SITE_URL
-      ? `${process.env.SITE_URL}/sitemap.xml`
-      : undefined,
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }

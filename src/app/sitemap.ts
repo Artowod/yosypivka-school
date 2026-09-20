@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { publicKnowledgePages } from "@/lib/knowledge";
+import { SITE_URL } from "@/lib/seo";
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.SITE_URL || "http://localhost:3000";
   const routes = [
     "",
     "/history",
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ]),
   ];
   return routes.map((route) => ({
-    url: `${base}${route}`,
+    url: `${SITE_URL}${route}`,
     changeFrequency: route.includes("classes") ? "daily" : "weekly",
     priority: route ? 0.7 : 1,
   }));

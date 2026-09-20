@@ -6,6 +6,7 @@ import { logError } from "@/lib/logging";
 import { PageHero } from "@/components/PageHero/PageHero";
 import { PhotoGallery } from "@/components/PhotoGallery/PhotoGallery";
 import { Loader } from "@/components/Loader/Loader";
+import { createPageMetadata } from "@/lib/seo";
 export const revalidate = 3600;
 export function generateStaticParams() {
   return CLASS_IDS.map((id) => ({ classId: String(id) }));
@@ -16,11 +17,14 @@ export async function generateMetadata({
   params: Promise<{ classId: string }>;
 }) {
   const { classId } = await params;
-  return {
+  if (!CLASS_IDS.includes(Number(classId) as (typeof CLASS_IDS)[number])) {
+    return { title: "Сторінку не знайдено", robots: { index: false } };
+  }
+  return createPageMetadata({
     title: `Галерея ${classId} класу`,
     description: `Світлини та спогади ${classId} класу Йосипівської початкової школи.`,
-    alternates: { canonical: `/classes/${classId}/gallery` },
-  };
+    path: `/classes/${classId}/gallery`,
+  });
 }
 export default async function GalleryPage({
   params,

@@ -5,7 +5,14 @@ import { Illustration } from "@/components/Illustration/Illustration";
 import { ClassIllustration } from "@/components/ClassIllustration/ClassIllustration";
 import page from "@/styles/Page.module.scss";
 import styles from "./Home.module.scss";
-export const metadata = { alternates: { canonical: "/" } };
+import { createPageMetadata } from "@/lib/seo";
+
+export const metadata = createPageMetadata({
+  title: "Йосипівська початкова школа — маленька школа, великі мрії",
+  description:
+    "Йосипівська початкова школа Брусилівської громади: класи, розклад занять, шкільне життя, галереї та історія рідного краю.",
+  path: "/",
+});
 export default function HomePage() {
   const moments_titles = [
     "Разом навчаємося",

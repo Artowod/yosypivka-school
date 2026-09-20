@@ -4,13 +4,14 @@ import { PhotoGallery } from "@/components/PhotoGallery/PhotoGallery";
 import { Loader } from "@/components/Loader/Loader";
 import { getPhotos } from "@/lib/data";
 import { logError } from "@/lib/logging";
+import { createPageMetadata } from "@/lib/seo";
 export const revalidate = 3600;
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Фотоархів",
   description:
     "Спогади Йосипівської початкової школи: фотографії за роками, місяцями та класами.",
-  alternates: { canonical: "/archive" },
-};
+  path: "/archive",
+});
 export default async function ArchivePage() {
   let initialData;
   try {
