@@ -1,6 +1,347 @@
 # AGENTS.md — School Website Project Specification
 
-## 1. Технічний стек
+## 1. Core Engineering Principle
+
+**Use the simplest solution that fully satisfies the requirement.**
+
+- Не вводити abstraction, dependency, state management, client-side JavaScript або architectural layer без конкретної потреби.
+- Спочатку використовувати built-in можливості React і Next.js.
+- Не ускладнювати простий код.
+- Не створювати код "про запас".
+- Не переписувати робочий код без причини.
+- Зміни повинні бути мінімальними та сфокусованими на поставленій задачі.
+
+---
+
+## 2. Design Principles
+
+- Використовувати SOLID там, де він дає практичну користь.
+- **Single Responsibility Principle** — основний принцип.
+- UI, data access та business logic розділяти там, де це реально покращує код.
+- Dependency Inversion використовувати тільки там, де існує реальна abstraction boundary.
+- Interface Segregation використовувати там, де він справді потрібен, а не формально.
+- Не створювати interfaces, factories, services або abstraction layers лише для формального виконання SOLID.
+- Простий, зрозумілий і підтримуваний код важливіший за теоретично "ідеальну" архітектуру.
+
+---
+
+## 3. Structure and Component Architecture
+
+### 5.1 Folder structure
+
+Структура папок — стандартний офіційний підхід для середнього Next.js / React проекту з урахуванням **Next.js App Router і файлового роутингу**.
+
+Окремий компонент має бути в своїй окремій папці з такою ж назвою. файл модульних стилів цього компоненту має знаходитись також в цій папці
+
+якщо стилі використовуються різними компонентами - назвати відповідно логіці і винести в окрему папку shared/styles/
+
+Не створювати складну кастомну архітектуру папок без необхідності.
+
+### 5.2 Component separation
+
+Розділяти код на окремі компоненти **за відповідальністю**, а не просто за кількістю рядків.
+
+Виносити окремий компонент, коли він:
+
+- має окрему відповідальність
+- повторно використовується
+- містить суттєву незалежну логіку
+- значно покращує читабельність
+- є окремою UI-сутністю
+
+Не робити надмірне дроблення.
+
+Не створювати без потреби:
+
+- wrapper-компоненти на декілька рядків
+- компоненти без власної відповідальності
+- абстракції "на майбутнє"
+- зайві factory/service/interface layers
+
+---
+
+## 4. Naming Conventions
+
+- React components: `PascalCase`
+- Component files: `PascalCase.tsx`
+- Hooks: `useSomething.ts`
+- Utility functions: `camelCase`
+- Variables: `camelCase`
+- Functions: `camelCase`
+- Route folders у `app/`: lowercase
+- Constants: `UPPER_SNAKE_CASE` тільки для справжніх constants
+- Назви повинні бути зрозумілими і описувати відповідальність сутності.
+
+Приклади:
+
+- `SchoolHeader.tsx`
+- `ClassSchedule.tsx`
+- `PhotoGallery.tsx`
+- `useCurrentUser.ts`
+- `formatDate.ts`
+
+---
+
+## 5. Dependency Policy
+
+Перед встановленням нової бібліотеки перевірити, чи React, Next.js, browser API або вже встановлені dependencies не вирішують задачу достатньо просто.
+
+### Prefer built-in solutions
+
+Приклади:
+
+- не встановлювати React Router — використовувати Next.js routing
+- не встановлювати Axios тільки для звичайних HTTP-запитів — використовувати native `fetch`, якщо він достатній
+- не встановлювати image optimization library для стандартних задач — використовувати `next/image`
+- не використовувати global state manager для простого local component state
+- не встановлювати date library для простого форматування, якщо достатньо `Intl`
+
+### Do NOT
+
+- Не додавати dependency без конкретної потреби.
+- Не вводити другу бібліотеку, яка дублює функціональність уже затвердженої.
+- Не міняти затверджений stack самостійно.
+- Не виконувати великий refactor тільки тому, що існує "красивіший" pattern.
+
+---
+
+## 6. Next.js Rules
+
+### 3.1 App Router
+
+- Використовувати **Next.js App Router**.
+- Не використовувати Pages Router для нового коду.
+- Не використовувати React Router.
+- Не створювати паралельну client-side routing систему.
+
+### 3.2 Server and Client Components
+
+- Компоненти за замовчуванням повинні залишатися **Server Components**.
+- Додавати `"use client"` тільки тоді, коли компонент реально потребує:
+
+  - React client hooks
+  - local client state
+  - event handlers
+  - browser API
+  - client-side interactive behavior
+
+- Client Components мають бути максимально локальними.
+- Не переводити цілу сторінку або layout у Client Component тільки через те, що один дочірній елемент потребує інтерактивності.
+
+### 3.3 Images
+
+Використовувати:
+
+- `<Image />` із `next/image`
+
+Не використовувати:
+
+- raw `<img>` без чіткої документованої технічної причини
+
+Правила:
+
+- завжди задавати коректний `alt`
+- для remote images явно налаштовувати дозволені image sources
+- використовувати відповідний `sizes` для responsive images
+- не використовувати `unoptimized`, якщо немає реальної технічної причини
+- не використовувати `priority` для всіх зображень підряд
+
+### 3.4 Navigation
+
+- Для внутрішньої навігації використовувати `<Link />` із `next/link`.
+- Не використовувати raw `<a>` для звичайної внутрішньої навігації.
+- Raw `<a>` допускається для зовнішніх посилань, якщо це доречно.
+
+### 3.5 Fonts
+
+- Використовувати `next/font`.
+- Не підключати стороннє рішення для шрифтів без потреби.
+
+### 3.6 Metadata / SEO
+
+- Використовувати Next.js Metadata API / `generateMetadata`.
+- Не маніпулювати `<head>` вручну без технічної необхідності.
+- Публічні сторінки повинні мати коректні title, description та інші SEO metadata.
+
+---
+
+## 7. Error Boundaries and Exception Handling
+
+Усі операції, які можуть реально завершитися помилкою, повинні мати явну стратегію обробки помилок.
+
+Обов'язково обробляти помилки для:
+
+- API requests
+- database operations
+- authentication / authorization operations
+- form submissions
+- file / image upload
+- data mutations
+- parsing external data
+- third-party API calls
+- async server actions
+- async client actions, де помилка може вплинути на користувача
+
+### 12.1 `try/catch`
+
+Використовувати `try/catch` там, де exception справді може бути кинутий і де на нього можна коректно відреагувати.
+
+Не додавати `try/catch` механічно навколо кожної функції.
+
+Кожен `catch` повинен:
+
+1. не залишати помилку непоміченою
+2. логувати технічну інформацію там, де це доречно
+3. переводити технічну помилку у зрозумілий application error
+4. показувати користувачу дружнє повідомлення, якщо помилка впливає на його дію
+
+### 12.2 Never swallow errors
+
+Заборонено залишати порожні `catch` blocks.
+
+Не робити так:
+
+```ts
+try {
+  // operation
+} catch (error) {}
+```
+
+або так:
+
+```ts
+try {
+  // operation
+} catch {
+  return;
+}
+```
+
+Помилка не повинна просто "зникати".
+
+### 12.3 User-facing errors
+
+Якщо помилка стосується дії користувача, показати error toast відповідно до правил секції **Error Handling and User Notifications**:
+
+- короткий текст зрозумілою мовою
+- можлива відповідна кольорова іконка - наприклад знак питання
+- плавна поява
+- приблизно 5 секунд
+- плавне зникнення
+
+Не показувати користувачу:
+
+- raw exception message
+- stack trace
+- database error
+- internal API details
+- secret values
+- internal system information
+
+### 12.4 Server-side error handling
+
+Для server-side operations:
+
+- ловити технічні помилки на відповідному рівні
+- логувати технічні деталі
+- не передавати raw server/database exception безпосередньо в UI
+- перетворювати exception у контрольований application error
+- повертати клієнту тільки безпечну і зрозумілу інформацію
+
+### 12.5 React / Next.js rendering errors
+
+Звичайний `try/catch` не використовувати як заміну React Error Boundary.
+
+Для page-level або route-level rendering failures:
+
+- використовувати Next.js `error.tsx`, коли це доречно
+- використовувати Error Boundaries для ізольованих client-side UI sections, якщо це необхідно
+- error screen повинен відповідати дружньому дитячому дизайну сайту
+- показувати користувачу зрозумілу можливість повторити дію або повернутися до робочої частини сайту
+
+### 12.6 Error handling principle
+
+Не кожен рядок коду потребує `try/catch`.
+
+Потрібна не максимальна кількість `try/catch`, а **надійна і передбачувана error handling strategy** для всіх реальних failure points.
+
+---
+
+## 8. Responsive Design and Browser Support
+
+сайт має бути адаптивним - мобілка - планшет - десктоп
+Відповідні медіапоїнти:
+Мобілка (Mobile): від 375 до 576px
+Планшет (Tablets): від 577px до 1023px
+Десктоп (Desktop): від 1024px і вище
+
+створення адаптивності стилей - за принципом mobile-first !
+
+підтримка 3х існуючих браузерів - Chrome . Сафарі (ios) . Firefox
+
+### Technical responsive rules
+
+- Основний підхід: **mobile-first**.
+- Перевіряти UI щонайменше для:
+  - mobile
+  - tablet
+  - desktop
+- Touch interactions мають працювати без необхідності hover.
+- Інтерактивні елементи повинні мати достатню touch area.
+- Підтримувати актуальні версії:
+  - Chrome
+  - Safari / iOS Safari
+  - Firefox
+
+---
+
+## 9. Accessibility
+
+Follow standard accessibility practices:
+
+- semantic HTML
+- keyboard navigation
+- visible focus states
+- meaningful `alt`
+- `alt=""` for decorative images
+- sufficient contrast
+- labels connected to inputs
+- accessible validation/error text
+- `aria-*` only where native HTML is insufficient
+- sufficiently large touch targets
+
+Photo lightbox/modals must:
+
+- trap focus
+- close with `Escape`
+- restore focus to the trigger
+- expose an accessible close button
+- prevent background interaction while open
+- support overlay click/tap close where appropriate
+
+Animations must respect `prefers-reduced-motion`.
+
+---
+
+## 10. SEO
+
+Implement standard Next.js SEO:
+
+- Metadata API
+- unique titles
+- useful descriptions
+- canonical URLs where appropriate
+- `sitemap.xml`
+- `robots.txt`
+- Open Graph metadata
+- meaningful heading hierarchy
+- descriptive internal links
+
+Use structured data only when it is accurate and genuinely useful.
+
+---
+
+## 11. Технічний стек
 
 ### 1.1 Core
 
@@ -101,6 +442,7 @@ All mutation payloads must also be validated on the server.
 #### Server state
 
 - Використовувати **TanStack Query / React Query** для client-side server state, коли реально потрібні:
+
   - caching
   - refetching
   - mutations
@@ -204,10 +546,55 @@ Therefore:
 - reject non-image uploads
 - avoid serving original oversized files when a smaller optimized version is sufficient
 
+---
+
+## 12. Rendering Strategy
+
+### 3.1 Public pages
+
+Для всієї публічної інформаційної частини сайту основний пріоритет:
+
+1. **SSG**
+2. **ISR / on-demand revalidation**
+3. Client-side interaction там, де вона доречна
+4. **SSR тільки тоді, коли request-time rendering справді необхідний**
+
+Не використовувати SSR за замовчуванням.
+
+SSG / ISR використовувати для:
+
+- інформації про школу
+- інформації про село / район
+- історичних сторінок
+- сторінок класів
+- викладацького складу
+- розкладу
+- фотографій та галерей
+- випусків
+- активностей школи
+- іншого публічного контенту, який не залежить від конкретного користувача
+
+### 3.2 Оновлення контенту
+
+Коли авторизований викладач або адміністратор змінює публічний контент:
+
+- записати зміну в базу даних
+- виконати revalidation потрібного route/cache
+- не переводити сторінку на SSR тільки через те, що її контент можна редагувати
+
+### 3.3 Photo gallery interaction
+
+Натискання користувача на фотографію не повинно викликати server-side rerender сторінки.
+
+Логіка:
+
+`thumbnail -> click/tap -> client-side lightbox/modal -> завантаження великої оптимізованої фотографії`
+
+Відкриття фотографії повинно бути звичайною client-side UI interaction.
 
 ---
 
-## 2. Data Model and Authorization
+## 13. Data Model and Authorization
 
 ### 2.1 Classes
 
@@ -373,177 +760,147 @@ Archive requirements:
 
 ---
 
-## 3. Rendering Strategy
+## 14. Server Actions, Route Handlers and Mutation Architecture
 
-### 3.1 Public pages
+### 15.1 Default mutation approach
 
-Для всієї публічної інформаційної частини сайту основний пріоритет:
+For mutations initiated from this Next.js application, prefer **Server Actions** when they provide the simplest and clearest implementation.
 
-1. **SSG**
-2. **ISR / on-demand revalidation**
-3. Client-side interaction там, де вона доречна
-4. **SSR тільки тоді, коли request-time rendering справді необхідний**
+Use Server Actions for:
 
-Не використовувати SSR за замовчуванням.
+- schedule save/update
+- gallery photo metadata edit
+- gallery photo create
+- gallery photo delete
+- admin role/permission updates
+- other authenticated forms owned by this application
 
-SSG / ISR використовувати для:
+Every protected Server Action must:
 
-- інформації про школу
-- інформації про село / район
-- історичних сторінок
-- сторінок класів
-- викладацького складу
-- розкладу
-- фотографій та галерей
-- випусків
-- активностей школи
-- іншого публічного контенту, який не залежить від конкретного користувача
+1. verify authentication on the server
+2. load current authorization data
+3. verify permission for the exact target resource/class
+4. validate payload with Zod
+5. perform the database/storage mutation
+6. create audit/error logs when required
+7. revalidate affected cache/tag/path
+8. return a normalized result to the UI
 
-### 3.2 Оновлення контенту
+Do NOT trust hidden UI controls, client-side roles, client-supplied `classId`, or client-side validation alone.
 
-Коли авторизований викладач або адміністратор змінює публічний контент:
+### 15.2 Route Handlers
 
-- записати зміну в базу даних
-- виконати revalidation потрібного route/cache
-- не переводити сторінку на SSR тільки через те, що її контент можна редагувати
+Use Route Handlers only when they are a better boundary, for example:
 
-### 3.3 Photo gallery interaction
+- weather API proxy/cache
+- Auth.js/OAuth integration needs
+- external callbacks/webhooks
+- endpoints that must be callable independently from a React form
 
-Натискання користувача на фотографію не повинно викликати server-side rerender сторінки.
+Do NOT create a parallel REST API for every internal Server Action without a concrete reason.
 
-Логіка:
+### 15.3 Normalized action result
 
-`thumbnail -> click/tap -> client-side lightbox/modal -> завантаження великої оптимізованої фотографії`
+Use a predictable result shape and never send raw exceptions to the browser.
 
-Відкриття фотографії повинно бути звичайною client-side UI interaction.
+If a user-facing operation fails, show:
+**"Щось пішло не за планом. Спробуйте трохи пізніше."**
 
----
+The toast:
 
-## 4. Next.js Rules
-
-### 3.1 App Router
-
-- Використовувати **Next.js App Router**.
-- Не використовувати Pages Router для нового коду.
-- Не використовувати React Router.
-- Не створювати паралельну client-side routing систему.
-
-### 3.2 Server and Client Components
-
-- Компоненти за замовчуванням повинні залишатися **Server Components**.
-- Додавати `"use client"` тільки тоді, коли компонент реально потребує:
-  - React client hooks
-  - local client state
-  - event handlers
-  - browser API
-  - client-side interactive behavior
-
-- Client Components мають бути максимально локальними.
-- Не переводити цілу сторінку або layout у Client Component тільки через те, що один дочірній елемент потребує інтерактивності.
-
-### 3.3 Images
-
-Використовувати:
-
-- `<Image />` із `next/image`
-
-Не використовувати:
-
-- raw `<img>` без чіткої документованої технічної причини
-
-Правила:
-
-- завжди задавати коректний `alt`
-- для remote images явно налаштовувати дозволені image sources
-- використовувати відповідний `sizes` для responsive images
-- не використовувати `unoptimized`, якщо немає реальної технічної причини
-- не використовувати `priority` для всіх зображень підряд
-
-### 3.4 Navigation
-
-- Для внутрішньої навігації використовувати `<Link />` із `next/link`.
-- Не використовувати raw `<a>` для звичайної внутрішньої навігації.
-- Raw `<a>` допускається для зовнішніх посилань, якщо це доречно.
-
-### 3.5 Fonts
-
-- За можливості використовувати `next/font`.
-- Не підключати стороннє рішення для шрифтів без потреби.
-
-### 3.6 Metadata / SEO
-
-- Використовувати Next.js Metadata API / `generateMetadata`.
-- Не маніпулювати `<head>` вручну без технічної необхідності.
-- Публічні сторінки повинні мати коректні title, description та інші SEO metadata.
+- appears smoothly
+- stays about 5 seconds
+- disappears smoothly
+- bottom-right on desktop
+- adaptive safe position on mobile
 
 ---
 
-## 5. Naming Conventions
+## 15. Logging and Audit Trail
 
-- React components: `PascalCase`
-- Component files: `PascalCase.tsx`
-- Hooks: `useSomething.ts`
-- Utility functions: `camelCase`
-- Variables: `camelCase`
-- Functions: `camelCase`
-- Route folders у `app/`: lowercase
-- Constants: `UPPER_SNAKE_CASE` тільки для справжніх constants
-- Назви повинні бути зрозумілими і описувати відповідальність сутності.
+Do NOT rely on a local production server file as the primary persistent log.
 
-Приклади:
+Use the existing **Neon Postgres** database for small persistent logs. No separate paid logging platform is required.
 
-- `SchoolHeader.tsx`
-- `ClassSchedule.tsx`
-- `PhotoGallery.tsx`
-- `useCurrentUser.ts`
-- `formatDate.ts`
+### 16.1 `errorLogs`
 
----
+Recommended fields:
 
-## 6. Structure and Component Architecture
+- `id`
+- `createdAt`
+- `userId` nullable
+- `userEmail` nullable
+- `location`
+- `errorCode` nullable
+- `message`
+- `context` nullable JSON
+- `requestId` nullable
 
-### 5.1 Folder structure
+Never log passwords, OAuth/session tokens, secrets, DB credentials, Cloudinary secrets, or full sensitive payloads.
 
-Структура папок — стандартний офіційний підхід для середнього Next.js / React проекту з урахуванням **Next.js App Router і файлового роутингу**.
+If an error happens outside direct user interaction:
 
-Не створювати складну кастомну архітектуру папок без необхідності.
+- do not show a global toast
+- write it silently to `errorLogs`
+- keep the public UI stable where possible
 
-### 5.2 Component separation
+If the user is actively waiting for Save/Delete/Add/Login/permissions update and it fails:
 
-Розділяти код на окремі компоненти **за відповідальністю**, а не просто за кількістю рядків.
+- reset loading/submitting state
+- show the standard friendly 5-second toast
+- log the technical failure when useful
 
-Виносити окремий компонент, коли він:
+### 16.2 `auditLogs`
 
-- має окрему відповідальність
-- повторно використовується
-- містить суттєву незалежну логіку
-- значно покращує читабельність
-- є окремою UI-сутністю
+Log only:
 
-Не робити надмірне дроблення.
+- successful login
+- data create/update/delete
+- photo create/edit/delete
+- schedule change
+- permission/role change
 
-Не створювати без потреби:
+Recommended fields:
 
-- wrapper-компоненти на декілька рядків
-- компоненти без власної відповідальності
-- абстракції "на майбутнє"
-- зайві factory/service/interface layers
+- `id`
+- `createdAt`
+- `userId` nullable
+- `userEmail`
+- `action`
+- `entityType`
+- `entityId` nullable
+- `classId` nullable
+- `summary`
 
----
-
-## 7. Design Principles
-
-- Використовувати SOLID там, де він дає практичну користь.
-- **Single Responsibility Principle** — основний принцип.
-- UI, data access та business logic розділяти там, де це реально покращує код.
-- Dependency Inversion використовувати тільки там, де існує реальна abstraction boundary.
-- Interface Segregation використовувати там, де він справді потрібен, а не формально.
-- Не створювати interfaces, factories, services або abstraction layers лише для формального виконання SOLID.
-- Простий, зрозумілий і підтримуваний код важливіший за теоретично "ідеальну" архітектуру.
+Do NOT log normal read-only page visits.
 
 ---
 
-## 8. Animation and Interaction
+## 16. Security
+
+This is a normal public school website, but standard web security practices are required.
+
+- Google login identifies the user.
+- Database roles/assignments define permissions.
+- There is **no fixed email allowlist**.
+- A user may log in successfully and still have no edit permissions.
+- Every mutation verifies authorization server-side.
+- Never trust client-supplied `classId` without checking assignment/admin role.
+- Use secure Auth.js session/cookie defaults.
+- Keep secrets in server-only environment variables.
+- Never expose secrets through `NEXT_PUBLIC_*`.
+- Never commit real `.env` secrets.
+- Validate mutation payloads with Zod on the server.
+- Validate image MIME/type and size.
+- Reject unsupported uploads.
+- Do not render user text through `dangerouslySetInnerHTML`.
+- Use reasonable mutation rate limiting only where abuse is realistically possible.
+- Destructive actions require confirmation.
+- State-changing operations must not be unauthenticated GET requests.
+
+---
+
+## 17. Animation and Interaction
 
 Всі кнопки - акордеони - перемикачі та інші екшн елементи Мають плавно рухатись ! тобто мати приємну анімацію
 
@@ -558,7 +915,7 @@ SSG / ISR використовувати для:
 
 ---
 
-## 9. Icons and Decorative Illustrations
+## 18. Icons and Decorative Illustrations
 
 всі великі іконки мають бути Різнокольоровими ! в інеті є багато прикладів - різнокольоровими в межах Однієї ікноки ! наприклад кнопка "Домашні завдання" має містити іконку зошита з олівцем де зошит наприклад має сині полоски а олівець - зелений - і при наведенні (натисканні в планшеті-мобілці) на іконку олівець наприклад рухається по листку вліво вправо і так далі. Має бути Інтерактивність максимально більшої кількості елементів
 
@@ -567,6 +924,7 @@ SSG / ISR використовувати для:
 - Великі feature icons бажано реалізовувати як custom multi-color SVG components.
 - Окремі частини SVG можуть анімуватися незалежно через CSS.
 - Звичайні icon libraries дозволені для маленьких utility icons:
+
   - close
   - chevron
   - search
@@ -578,31 +936,7 @@ SSG / ISR використовувати для:
 
 ---
 
-## 10. Responsive Design and Browser Support
-
-сайт має бути адаптивним - мобілка - планшет - десктоп (стандартні медіа поінти для цих девайсів)!
-
-створення адаптивності стилей - за принципом mobile-first !
-
-підтримка 3х існуючих браузерів - Chrome . Сафарі (ios) . Firefox
-
-### Technical responsive rules
-
-- Основний підхід: **mobile-first**.
-- Перевіряти UI щонайменше для:
-  - mobile
-  - tablet
-  - desktop
-- Touch interactions мають працювати без необхідності hover.
-- Інтерактивні елементи повинні мати достатню touch area.
-- Підтримувати актуальні версії:
-  - Chrome
-  - Safari / iOS Safari
-  - Firefox
-
----
-
-## 11. Loading UX
+## 19. Loading UX
 
 Скрізь, де користувач повинен чекати на суттєве завантаження або виконання дії, показувати приємний **дитячий loader**.
 
@@ -637,7 +971,7 @@ Fallback state не повинен виглядати страшно або те
 
 ---
 
-## 12. Error Handling and User Notifications
+## 20. Error Handling and User Notifications
 
 Усі помилки, які можуть бути корисні користувачу, показувати коротким зрозумілим повідомленням.
 
@@ -682,297 +1016,14 @@ Error toast може містити:
 
 ---
 
-
-## 13. Error Boundaries and Exception Handling
-
-Усі операції, які можуть реально завершитися помилкою, повинні мати явну стратегію обробки помилок.
-
-Обов'язково обробляти помилки для:
-
-- API requests
-- database operations
-- authentication / authorization operations
-- form submissions
-- file / image upload
-- data mutations
-- parsing external data
-- third-party API calls
-- async server actions
-- async client actions, де помилка може вплинути на користувача
-
-### 12.1 `try/catch`
-
-Використовувати `try/catch` там, де exception справді може бути кинутий і де на нього можна коректно відреагувати.
-
-Не додавати `try/catch` механічно навколо кожної функції.
-
-Кожен `catch` повинен:
-
-1. не залишати помилку непоміченою
-2. логувати технічну інформацію там, де це доречно
-3. переводити технічну помилку у зрозумілий application error
-4. показувати користувачу дружнє повідомлення, якщо помилка впливає на його дію
-
-### 12.2 Never swallow errors
-
-Заборонено залишати порожні `catch` blocks.
-
-Не робити так:
-
-```ts
-try {
-  // operation
-} catch (error) {
-}
-```
-
-або так:
-
-```ts
-try {
-  // operation
-} catch {
-  return;
-}
-```
-
-Помилка не повинна просто "зникати".
-
-### 12.3 User-facing errors
-
-Якщо помилка стосується дії користувача, показати error toast відповідно до правил секції **Error Handling and User Notifications**:
-
-- короткий текст зрозумілою мовою
-- дружня дитяча ілюстрація / здивований герой
-- плавна поява
-- приблизно 5 секунд
-- плавне зникнення
-
-Не показувати користувачу:
-
-- raw exception message
-- stack trace
-- database error
-- internal API details
-- secret values
-- internal system information
-
-### 12.4 Server-side error handling
-
-Для server-side operations:
-
-- ловити технічні помилки на відповідному рівні
-- логувати технічні деталі
-- не передавати raw server/database exception безпосередньо в UI
-- перетворювати exception у контрольований application error
-- повертати клієнту тільки безпечну і зрозумілу інформацію
-
-### 12.5 React / Next.js rendering errors
-
-Звичайний `try/catch` не використовувати як заміну React Error Boundary.
-
-Для page-level або route-level rendering failures:
-
-- використовувати Next.js `error.tsx`, коли це доречно
-- використовувати Error Boundaries для ізольованих client-side UI sections, якщо це необхідно
-- error screen повинен відповідати дружньому дитячому дизайну сайту
-- показувати користувачу зрозумілу можливість повторити дію або повернутися до робочої частини сайту
-
-### 12.6 Error handling principle
-
-Не кожен рядок коду потребує `try/catch`.
-
-Потрібна не максимальна кількість `try/catch`, а **надійна і передбачувана error handling strategy** для всіх реальних failure points.
-
----
-
-## 14. Dependency Policy
-
-Перед встановленням нової бібліотеки перевірити, чи React, Next.js, browser API або вже встановлені dependencies не вирішують задачу достатньо просто.
-
-### Prefer built-in solutions
-
-Приклади:
-
-- не встановлювати React Router — використовувати Next.js routing
-- не встановлювати Axios тільки для звичайних HTTP-запитів — використовувати native `fetch`, якщо він достатній
-- не встановлювати image optimization library для стандартних задач — використовувати `next/image`
-- не використовувати global state manager для простого local component state
-- не встановлювати date library для простого форматування, якщо достатньо `Intl`
-
-### Do NOT
-
-- Не додавати dependency без конкретної потреби.
-- Не вводити другу бібліотеку, яка дублює функціональність уже затвердженої.
-- Не міняти затверджений stack самостійно.
-- Не виконувати великий refactor тільки тому, що існує "красивіший" pattern.
-
----
-
-
-## 15. Server Actions, Route Handlers and Mutation Architecture
-
-### 15.1 Default mutation approach
-
-For mutations initiated from this Next.js application, prefer **Server Actions** when they provide the simplest and clearest implementation.
-
-Use Server Actions for:
-- schedule save/update
-- gallery photo metadata edit
-- gallery photo create
-- gallery photo delete
-- admin role/permission updates
-- other authenticated forms owned by this application
-
-Every protected Server Action must:
-1. verify authentication on the server
-2. load current authorization data
-3. verify permission for the exact target resource/class
-4. validate payload with Zod
-5. perform the database/storage mutation
-6. create audit/error logs when required
-7. revalidate affected cache/tag/path
-8. return a normalized result to the UI
-
-Do NOT trust hidden UI controls, client-side roles, client-supplied `classId`, or client-side validation alone.
-
-### 15.2 Route Handlers
-
-Use Route Handlers only when they are a better boundary, for example:
-- weather API proxy/cache
-- Auth.js/OAuth integration needs
-- external callbacks/webhooks
-- endpoints that must be callable independently from a React form
-
-Do NOT create a parallel REST API for every internal Server Action without a concrete reason.
-
-### 15.3 Normalized action result
-
-Use a predictable result shape and never send raw exceptions to the browser.
-
-If a user-facing operation fails, show:
-**"Щось пішло не за планом. Спробуйте трохи пізніше."**
-
-The toast:
-- appears smoothly
-- stays about 5 seconds
-- disappears smoothly
-- bottom-right on desktop
-- adaptive safe position on mobile
-
----
-
-## 16. Logging and Audit Trail
-
-Do NOT rely on a local production server file as the primary persistent log.
-
-Use the existing **Neon Postgres** database for small persistent logs. No separate paid logging platform is required.
-
-### 16.1 `errorLogs`
-
-Recommended fields:
-- `id`
-- `createdAt`
-- `userId` nullable
-- `userEmail` nullable
-- `location`
-- `errorCode` nullable
-- `message`
-- `context` nullable JSON
-- `requestId` nullable
-
-Never log passwords, OAuth/session tokens, secrets, DB credentials, Cloudinary secrets, or full sensitive payloads.
-
-If an error happens outside direct user interaction:
-- do not show a global toast
-- write it silently to `errorLogs`
-- keep the public UI stable where possible
-
-If the user is actively waiting for Save/Delete/Add/Login/permissions update and it fails:
-- reset loading/submitting state
-- show the standard friendly 5-second toast
-- log the technical failure when useful
-
-### 16.2 `auditLogs`
-
-Log only:
-- successful login
-- data create/update/delete
-- photo create/edit/delete
-- schedule change
-- permission/role change
-
-Recommended fields:
-- `id`
-- `createdAt`
-- `userId` nullable
-- `userEmail`
-- `action`
-- `entityType`
-- `entityId` nullable
-- `classId` nullable
-- `summary`
-
-Do NOT log normal read-only page visits.
-
----
-
-## 17. Security
-
-This is a normal public school website, but standard web security practices are required.
-
-- Google login identifies the user.
-- Database roles/assignments define permissions.
-- There is **no fixed email allowlist**.
-- A user may log in successfully and still have no edit permissions.
-- Every mutation verifies authorization server-side.
-- Never trust client-supplied `classId` without checking assignment/admin role.
-- Use secure Auth.js session/cookie defaults.
-- Keep secrets in server-only environment variables.
-- Never expose secrets through `NEXT_PUBLIC_*`.
-- Never commit real `.env` secrets.
-- Validate mutation payloads with Zod on the server.
-- Validate image MIME/type and size.
-- Reject unsupported uploads.
-- Do not render user text through `dangerouslySetInnerHTML`.
-- Use reasonable mutation rate limiting only where abuse is realistically possible.
-- Destructive actions require confirmation.
-- State-changing operations must not be unauthenticated GET requests.
-
----
-
-## 18. Accessibility
-
-Follow standard accessibility practices:
-- semantic HTML
-- keyboard navigation
-- visible focus states
-- meaningful `alt`
-- `alt=""` for decorative images
-- sufficient contrast
-- labels connected to inputs
-- accessible validation/error text
-- `aria-*` only where native HTML is insufficient
-- sufficiently large touch targets
-
-Photo lightbox/modals must:
-- trap focus
-- close with `Escape`
-- restore focus to the trigger
-- expose an accessible close button
-- prevent background interaction while open
-- support overlay click/tap close where appropriate
-
-Animations must respect `prefers-reduced-motion`.
-
----
-
-## 19. Testing
+## 21. Testing
 
 Use a minimal but meaningful automated test set.
 
 ### Permission tests
+
 Verify:
+
 - guest cannot mutate schedule/gallery
 - teacher can edit assigned class
 - teacher cannot edit another class
@@ -981,7 +1032,9 @@ Verify:
 - forged `classId` is rejected server-side
 
 ### Schedule tests
+
 Verify:
+
 - authorized save only
 - current week selection
 - weekend editing defaults to next week
@@ -989,7 +1042,9 @@ Verify:
 - invalid payload rejection
 
 ### Gallery tests
+
 Verify:
+
 - authorized create
 - metadata edit
 - delete
@@ -998,7 +1053,9 @@ Verify:
 - Archive reuses the same photo records
 
 ### E2E smoke tests
+
 Use a small Playwright suite where practical:
+
 - visitor sees schedule
 - teacher edits own class
 - teacher cannot edit another class
@@ -1010,11 +1067,12 @@ Do not pursue coverage percentages for their own sake.
 
 ---
 
-## 20. Environment Variables
+## 22. Environment Variables
 
 Keep an `.env.example` with variable names only.
 
 Expected groups:
+
 - `DATABASE_URL`
 - Auth.js secret
 - Google OAuth client ID
@@ -1030,9 +1088,10 @@ Never put fake-but-real-looking secrets into committed source code.
 
 ---
 
-## 21. Deployment
+## 23. Deployment
 
 Preferred deployment:
+
 - **Vercel Hobby** — Next.js app
 - **Neon Free** — PostgreSQL
 - **Cloudinary Free** — image storage/delivery
@@ -1043,26 +1102,10 @@ Do not depend on persistent local files on Vercel for logs, uploads, or applicat
 
 ---
 
-## 22. SEO
-
-Implement standard Next.js SEO:
-- Metadata API
-- unique titles
-- useful descriptions
-- canonical URLs where appropriate
-- `sitemap.xml`
-- `robots.txt`
-- Open Graph metadata
-- meaningful heading hierarchy
-- descriptive internal links
-
-Use structured data only when it is accurate and genuinely useful.
-
----
-
-## 23. Weather
+## 24. Weather
 
 Approved weather API:
+
 - **Open-Meteo**
 
 Use fixed verified coordinates for the school/village location.
@@ -1070,23 +1113,29 @@ Use fixed verified coordinates for the school/village location.
 Do not geolocate every visitor.
 
 ### Weather caching
+
 - fetch on the server
 - cache/revalidate about once per hour
 - do not call Open-Meteo for every visitor
 - opening the widget normally uses cached hourly data
 
 ### Weather widget
+
 Compact view:
+
 - current weather
 - temperature
 - short condition summary
 - small icon
 
 Expanded on click/tap:
+
 - compact weekly forecast
 
 ### Weather failure
+
 If weather fails:
+
 - do not break the page
 - show inside the widget:
   **"Не вдалося оновити погоду. Натисни на мене, щоб спробувати ще раз."**
@@ -1096,7 +1145,7 @@ If weather fails:
 
 ---
 
-## 24. Admin Cabinet and Permission Management
+## 25. Admin Cabinet and Permission Management
 
 Only users with `admin` role see an **Admin Cabinet** control in the site header.
 
@@ -1105,6 +1154,7 @@ Prefer a dedicated admin page instead of a modal because the user/permission lis
 Show all users who have successfully logged in at least once.
 
 For each user show:
+
 - email
 - name if available
 - checkbox `Admin`
@@ -1116,6 +1166,7 @@ For each user show:
 Class checkboxes mean teacher assignment.
 
 A user may have:
+
 - one class
 - multiple classes
 - admin only
@@ -1123,7 +1174,9 @@ A user may have:
 - no edit permissions
 
 ### Save permissions
+
 On Save:
+
 1. verify current admin session server-side
 2. verify current user still has admin permission
 3. validate submitted permissions
@@ -1133,6 +1186,7 @@ On Save:
 7. show success feedback
 
 On failure:
+
 - roll back transaction
 - keep UI recoverable
 - show standard error toast
@@ -1142,15 +1196,17 @@ Protect against accidentally removing the final remaining administrator without 
 
 ---
 
-## 25. Logged-in User Avatar
+## 26. Logged-in User Avatar
 
 Authenticated users see an avatar control in the header.
 
 If no profile image is used:
+
 - show the first letter of the user's name
 - use a child-friendly decorative background
 
 On desktop hover/focus and mobile/tablet tap show:
+
 - name
 - surname if available
 - email
@@ -1161,19 +1217,23 @@ The popover must be keyboard accessible and closable.
 
 ---
 
-## 26. Photo Upload and Editing Rules
+## 27. Photo Upload and Editing Rules
 
 ### Supported formats
+
 Accept:
+
 - JPEG/JPG
 - PNG
 - WebP
 - HEIC/HEIF
 
 ### Size target
+
 Preferred result: **<= 5 MB** per photo.
 
 If source photo is larger than 5 MB:
+
 1. attempt automatic client-side resize/compression
 2. reduce dimensions/quality as needed
 3. target <=5 MB
@@ -1184,7 +1244,9 @@ Do not enlarge small images or aggressively destroy quality.
 If safe client compression is unavailable for a format, use a controlled fallback within the provider's accepted upload limit or show a friendly request to choose a smaller file.
 
 ### Create
+
 Create photo with:
+
 - image
 - title
 - optional description
@@ -1192,7 +1254,9 @@ Create photo with:
 - class association
 
 ### Edit
+
 Edit changes metadata only:
+
 - title
 - description
 - date if allowed
@@ -1200,18 +1264,23 @@ Edit changes metadata only:
 **The image file cannot be replaced through Edit.**
 
 To replace an image:
+
 1. delete old photo
 2. create a new one
 
 ### Delete
+
 Delete removes:
+
 - Cloudinary asset
 - DB photo record and metadata
 
 Require confirmation and write an audit log.
 
 ### Cloudinary success + DB failure
+
 If upload succeeds but DB insert fails:
+
 1. attempt best-effort cleanup of the new Cloudinary asset
 2. reset upload/loading state
 3. show the standard user-facing error toast
@@ -1222,13 +1291,14 @@ If cleanup also fails, log that cleanup failure separately.
 
 ---
 
-## 27. Cache and Revalidation Strategy
+## 28. Cache and Revalidation Strategy
 
 Editing happens directly on the same public class/gallery pages.
 
 Do not create a separate teacher-only copy of the page.
 
 ### Schedule
+
 Guest sees normal text.
 
 Authorized teacher/admin sees Edit.
@@ -1236,26 +1306,31 @@ Authorized teacher/admin sees Edit.
 Edit mode replaces schedule text cells with form inputs in the same visual positions.
 
 After Save:
+
 - revalidate affected class schedule tag
 - revalidate affected class page
 - keep unrelated classes untouched
 
 Recommended tags:
+
 - `schedule:class:{classId}:week:{weekStart}`
 - `class:{classId}`
 
 ### Gallery
+
 Guest sees normal gallery.
 
 Authorized teacher/admin gets Create/Edit/Delete controls on the same gallery.
 
 After create/edit/delete:
+
 - update active local/query state appropriately
 - revalidate affected gallery data
 - revalidate affected class page
 - revalidate Archive data
 
 Recommended tags:
+
 - `gallery:class:{classId}`
 - `photos:archive`
 - `class:{classId}`
@@ -1264,8 +1339,7 @@ Do not revalidate the whole site unnecessarily.
 
 ---
 
-
-## 28. Final Route Map
+## 29. Final Route Map
 
 Required public routes:
 
@@ -1299,7 +1373,7 @@ Teachers/admins edit allowed data directly on the same class/gallery pages used 
 
 ---
 
-## 29. Final Database Schema Blueprint
+## 30. Final Database Schema Blueprint
 
 Use **Neon Postgres + Drizzle ORM**.
 
@@ -1518,7 +1592,7 @@ Recommended behavior:
 
 ---
 
-## 30. Seed Data
+## 31. Seed Data
 
 Seed development data automatically.
 
@@ -1605,7 +1679,7 @@ Text lengths should vary significantly to stress-test layout.
 
 ---
 
-## 31. Initial Build Execution Rule
+## 32. Initial Build Execution Rule
 
 Codex should build the project as one cohesive implementation, including tests.
 
@@ -1645,7 +1719,7 @@ Only treat missing external credentials/secrets as expected setup blockers.
 
 ---
 
-## 32. Definition of Done
+## 33. Definition of Done
 
 The first complete implementation is considered done when all of the following are true.
 
@@ -1800,7 +1874,7 @@ Placeholder page text/images are intentionally allowed where this document expli
 
 ---
 
-## 33. Final Codex Instruction
+## 34. Final Codex Instruction
 
 Before writing code:
 
@@ -1812,19 +1886,6 @@ Before writing code:
 - do not pause for minor aesthetic ambiguities
 - make reasonable decisions and continue
 - complete the implementation and tests in the same workstream
-
-## 34. Core Engineering Principle
-
-**Use the simplest solution that fully satisfies the requirement.**
-
-- Не вводити abstraction, dependency, state management, client-side JavaScript або architectural layer без конкретної потреби.
-- Спочатку використовувати built-in можливості React і Next.js.
-- Не ускладнювати простий код.
-- Не створювати код "про запас".
-- Не переписувати робочий код без причини.
-- Зміни повинні бути мінімальними та сфокусованими на поставленій задачі.
-
----
 
 # 35. NON-NEGOTIABLE RULES
 
@@ -1940,7 +2001,6 @@ Before writing code:
 розклад занять на тиждень ( поточний день має підсвічуватись окремо Яскраво! - тобто можливо якоюсь іконкою навпроти з посмішкою соняшником -що завгодно щоб привернути увагу - Не просто кольором! все має бути Живе і привабливе!) - фотографії активностей - клас - на полі під час фізкультури - в столовці - тощо ( фотографії мають бути відокремлені часом - наприклад під мініатюрами фото - напис коли була створена фото і що це таке було коротко 1ю фразою . при натисканні на фото - фото розкривається на 80 відсотків екрану з максимальною якістю і тут також можливо присутня більш розширена інформація по фото коли створена що це було і так далі. при наведенні на мініатюру - зявляється лагідна анімаційна іконка яка підкаже що треба натиснути на мене щоб відкрити фотку )
 
 ---
-
 
 ## 36.3 Розклад занять — логіка і вигляд
 
@@ -2196,7 +2256,6 @@ Virtualization повинна працювати разом із infinite scroll
 
 ---
 
-
 ## 36.8 Адмін-кабінет і розподіл прав
 
 У адміністратора в шапці сайту має бути окрема зрозуміла кнопка **Адмін-кабінет**.
@@ -2206,6 +2265,7 @@ Virtualization повинна працювати разом із infinite scroll
 Показуються всі користувачі, які хоча б один раз успішно логінились через Google.
 
 Для кожного користувача:
+
 - email
 - ім'я, якщо є
 - checkbox **Admin**
@@ -2225,10 +2285,12 @@ Virtualization повинна працювати разом із infinite scroll
 Залогінений користувач бачить у шапці красиву аватарку.
 
 Якщо окрему фотографію профілю не використовуємо:
+
 - показуємо першу літеру імені
 - фон/малюнок відповідає дитячому стилю сайту
 
 При hover/focus, а на mobile/tablet по tap, показуємо:
+
 - ім'я
 - прізвище, якщо є
 - email
@@ -2244,6 +2306,7 @@ Virtualization повинна працювати разом із infinite scroll
 **«Щось пішло не за планом. Спробуйте трохи пізніше.»**
 
 Повідомлення:
+
 - плавно з'являється
 - справа знизу на desktop
 - адаптивно на mobile
@@ -2252,6 +2315,7 @@ Virtualization повинна працювати разом із infinite scroll
 - може мати здивованого дитячого героя
 
 Якщо помилка сталася у фоновому процесі:
+
 - глобальне повідомлення не показувати
 - тихо записати помилку в технічний лог
 
@@ -2262,6 +2326,7 @@ Virtualization повинна працювати разом із infinite scroll
 Бажана ціль — **до 5 MB на фотографію**.
 
 Якщо фото більше:
+
 - сайт автоматично пробує зменшити розмір/вагу
 - показує локальний loader
 - після підготовки продовжує завантаження
@@ -2269,12 +2334,15 @@ Virtualization повинна працювати разом із infinite scroll
 Підтримати стандартні формати Android/iPhone.
 
 ### Додати
+
 - фото
 - назва
 - опис, якщо є
 
 ### Редагувати
+
 Редагуються тільки:
+
 - назва
 - опис
 - за необхідності дата
@@ -2282,11 +2350,14 @@ Virtualization повинна працювати разом із infinite scroll
 **Саму фотографію через Edit замінити не можна.**
 
 Якщо треба замінити фото:
+
 1. видалити старе
 2. створити нове
 
 ### Видалити
+
 Видаляється:
+
 - файл
 - назва
 - опис
@@ -2301,6 +2372,7 @@ Virtualization повинна працювати разом із infinite scroll
 Викладач відкриває **ту саму сторінку класу**, яку бачить звичайний відвідувач.
 
 ### Розклад
+
 Гість бачить тексти уроків.
 
 Викладач свого класу / адмін бачить **Змінити**.
@@ -2310,9 +2382,11 @@ Virtualization повинна працювати разом із infinite scroll
 Після Save нові дані одразу відображаються на цій самій сторінці.
 
 ### Галерея
+
 Гість бачить фото.
 
 Дозволений викладач / адмін додатково бачить:
+
 - **Редагувати**
 - **Видалити**
 - **Додати**
@@ -2330,6 +2404,7 @@ Virtualization повинна працювати разом із infinite scroll
 По натисканню показується стислий прогноз на тиждень.
 
 Якщо API тимчасово не відповідає:
+
 - сайт продовжує працювати
 - у самому віджеті:
   **«Не вдалося оновити погоду. Натисни на мене, щоб спробувати ще раз.»**
@@ -2337,8 +2412,6 @@ Virtualization повинна працювати разом із infinite scroll
 - технічну помилку записуємо в лог
 
 ---
-
-
 
 ## 36.14 Наповнення сторінок на етапі розробки
 

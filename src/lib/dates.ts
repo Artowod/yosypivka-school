@@ -8,16 +8,6 @@ export function localDate(now = new Date()) {
     day: "2-digit",
   }).format(now);
 }
-export function weekStart(now = new Date(), editing = false) {
-  const date = new Date(`${localDate(now)}T12:00:00Z`);
-  const day = date.getUTCDay();
-  date.setUTCDate(
-    date.getUTCDate() -
-      ((day + 6) % 7) +
-      (editing && (day === 0 || day === 6) ? 7 : 0),
-  );
-  return date.toISOString().slice(0, 10);
-}
 export function formatDate(
   value: string,
   options: Intl.DateTimeFormatOptions = {

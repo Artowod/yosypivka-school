@@ -1,31 +1,18 @@
 import { describe, it, expect } from "vitest";
-import { weekStart, localDate } from "@/lib/dates";
+import { currentDay, localDate } from "@/lib/dates";
 import { scheduleSchema, editPhotoSchema } from "@/lib/validation";
 import { demoEntries } from "@/lib/demo";
-describe("Kyiv calendar weeks", () => {
-  it("keeps the public current week on Saturday and Sunday", () => {
-    expect(weekStart(new Date("2026-09-05T12:00:00Z"))).toBe("2026-08-31");
-    expect(weekStart(new Date("2026-09-06T12:00:00Z"))).toBe("2026-08-31");
-  });
-  it("opens next week for weekend edits", () => {
-    expect(weekStart(new Date("2026-09-05T12:00:00Z"), true)).toBe(
-      "2026-09-07",
-    );
-    expect(weekStart(new Date("2026-09-06T12:00:00Z"), true)).toBe(
-      "2026-09-07",
-    );
-  });
+describe("Kyiv calendar dates", () => {
   it("rolls over at Kyiv midnight, including the DST season", () => {
-    expect(weekStart(new Date("2026-09-06T21:00:00Z"))).toBe("2026-09-07");
     expect(localDate(new Date("2026-01-04T22:01:00Z"))).toBe("2026-01-05");
   });
-  it("handles year boundaries", () =>
-    expect(weekStart(new Date("2027-01-02T12:00:00Z"), true)).toBe(
-      "2027-01-04",
-    ));
+  it("identifies the current school day", () => {
+    expect(currentDay(new Date("2026-09-07T12:00:00Z"))).toBe(0);
+    expect(currentDay(new Date("2026-09-12T12:00:00Z"))).toBe(5);
+  });
 });
 describe("payload validation", () => {
-  const valid = { classId: 1, weekStart: "2026-08-31", entries: demoEntries() };
+  const valid = { classId: 1, entries: demoEntries() };
   it("accepts a complete six-day schedule", () =>
     expect(scheduleSchema.safeParse(valid).success).toBe(true));
   it("rejects duplicate slots, wrong dates, classes and oversized subjects", () => {
@@ -38,7 +25,7 @@ describe("payload validation", () => {
           valid.entries[0],
         ],
       },
-      { ...valid, weekStart: "2026-09-01" },
+      { ...valid, weekStart: "2026-08-31" },
       { ...valid, classId: 5 },
       {
         ...valid,

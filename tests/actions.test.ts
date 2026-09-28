@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { eq } from "drizzle-orm";
 import * as schema from "@/db/schema";
 import type { Actor } from "@/lib/permissions";
@@ -59,7 +59,10 @@ const admin: Actor = {
 };
 const photoId = "20000000-0000-4000-8000-000000000001";
 beforeAll(async () => {
-  await client.exec(readFileSync("drizzle/0000_real_talisman.sql", "utf8"));
+  for (const migration of readdirSync("drizzle")
+    .filter((file) => file.endsWith(".sql"))
+    .sort())
+    await client.exec(readFileSync(`drizzle/${migration}`, "utf8"));
   state.db = db;
 });
 afterAll(async () => {
@@ -141,7 +144,7 @@ function uploadForm(title = "New photo", galleryId = "class_1") {
   return form;
 }
 describe("protected schedule actions with PostgreSQL", () => {
-  const input = { classId: 1, weekStart: "2026-08-31", entries: demoEntries() };
+  const input = { classId: 1, entries: demoEntries() };
   it("rejects unauthenticated and forged class saves", async () => {
     state.actor = null;
     expect((await saveSchedule(input)).ok).toBe(false);
@@ -149,12 +152,10 @@ describe("protected schedule actions with PostgreSQL", () => {
     expect((await saveSchedule({ ...input, classId: 2 })).ok).toBe(false);
     expect(await db.select().from(schema.scheduleEntries)).toHaveLength(0);
   });
-  it("saves assigned class, preserves prior weeks and audits", async () => {
+  it("saves and replaces the single assigned-class schedule", async () => {
     expect((await saveSchedule(input)).ok).toBe(true);
-    expect((await saveSchedule({ ...input, weekStart: "2026-09-07" })).ok).toBe(
-      true,
-    );
-    expect(await db.select().from(schema.scheduleEntries)).toHaveLength(72);
+    expect((await saveSchedule(input)).ok).toBe(true);
+    expect(await db.select().from(schema.scheduleEntries)).toHaveLength(36);
     expect(await db.select().from(schema.auditLogs)).toHaveLength(2);
   });
   it("allows admin all classes", async () => {
@@ -173,7 +174,7 @@ describe("protected schedule actions with PostgreSQL", () => {
     );
     expect(await db.select().from(schema.scheduleEntries)).toHaveLength(0);
   });
-  it("enforces unique class/week/day/lesson at DB level", async () => {
+  it("enforces unique class/day/lesson at DB level", async () => {
     await saveSchedule(input);
     await expect(
       db
@@ -181,12 +182,11 @@ describe("protected schedule actions with PostgreSQL", () => {
         .values({
           ...input.entries[0],
           classId: 1,
-          weekStart: input.weekStart,
         }),
     ).rejects.toThrow();
   });
-  it("has a friendly empty current-week model", async () => {
-    const result = await getSchedule(1, "2026-08-31");
+  it("has a friendly empty schedule model", async () => {
+    const result = await getSchedule(1);
     expect(result.entries).toHaveLength(36);
     expect(result.entries.every((entry) => !entry.subject)).toBe(true);
   });

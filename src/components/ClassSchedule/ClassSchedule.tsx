@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { readSchedule, saveSchedule } from "@/app/actions/schedule";
 import { canEditClass } from "@/lib/permissions";
-import { weekStart, formatDate, currentDay } from "@/lib/dates";
+import { currentDay } from "@/lib/dates";
 import { DAYS, DAY_NAMES, FRIENDLY_ERROR } from "@/lib/constants";
 import { scheduleSchema, type ScheduleInput } from "@/lib/validation";
 import { useViewer, useToast } from "../Providers/Providers";
@@ -19,14 +19,11 @@ interface ScheduleData {
 }
 export function ClassSchedule({
   classId,
-  initialWeek,
   initialData,
 }: {
   classId: number;
-  initialWeek: string;
   initialData: ScheduleData;
 }) {
-  const [week, setWeek] = useState(initialWeek);
   const [today, setToday] = useState(-1);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,13 +34,11 @@ export function ClassSchedule({
     resolver: zodResolver(scheduleSchema),
     defaultValues: {
       classId,
-      weekStart: initialWeek,
       entries: initialData.entries,
     },
   });
   useEffect(() => {
     const tick = () => {
-      setWeek(weekStart());
       setToday(currentDay());
     };
     tick();
@@ -51,25 +46,24 @@ export function ClassSchedule({
     return () => clearInterval(timer);
   }, []);
   const query = useQuery({
-    queryKey: ["schedule", classId, week],
+    queryKey: ["schedule", classId],
     queryFn: async () => {
-      const result = await readSchedule(classId, week);
+      const result = await readSchedule(classId);
       if (!result.ok) throw new Error("SCHEDULE_FAILED");
       return result.data;
     },
-    initialData: week === initialWeek ? initialData : undefined,
+    initialData,
     refetchInterval: 60000,
   });
   const data = query.data;
   const allowed = canEditClass(viewer.data?.actor ?? null, classId);
-  async function beginEdit(targetWeek = weekStart(new Date(), true)) {
+  async function beginEdit() {
     setLoading(true);
     try {
-      const result = await readSchedule(classId, targetWeek);
+      const result = await readSchedule(classId);
       if (!result.ok) throw new Error("SCHEDULE_FAILED");
       form.reset({
         classId,
-        weekStart: targetWeek,
         entries: result.data.entries,
       });
       setEditing(true);
@@ -96,9 +90,7 @@ export function ClassSchedule({
     () =>
       toast("Перевірте розклад: кожен урок має бути до 120 символів.", true),
   );
-  const editedWeek = useWatch({ control: form.control, name: "weekStart" });
   const editedEntries = useWatch({ control: form.control, name: "entries" });
-  const visibleWeek = editing ? editedWeek : week;
   const entries = editing ? editedEntries : (data?.entries ?? []);
   return (
     <section id="schedule" className={`container section ${styles.section}`}>
@@ -107,10 +99,7 @@ export function ClassSchedule({
         <div>
           <p className="eyebrow">Наш шкільний щоденник</p>
           <h2>Розклад занять</h2>
-          <p>
-            {formatDate(visibleWeek)} ·{" "}
-            {editing ? "Редагуємо цей тиждень" : "Поточний тиждень"}
-          </p>
+          <p>{editing ? "Редагуємо розклад" : "Постійний розклад класу"}</p>
         </div>
         {allowed && !editing && (
           <button onClick={() => void beginEdit()} disabled={loading}>
@@ -134,37 +123,20 @@ export function ClassSchedule({
       {!data && <Loader />}
       {data && !data.entries.some((entry) => entry.subject) && !editing && (
         <p className={styles.note}>
-          Розклад на цей тиждень ще готується. Завітайте трохи пізніше!
+          Розклад ще готується. Завітайте трохи пізніше!
         </p>
       )}
       <form onSubmit={submit}>
         <fieldset disabled={loading || form.formState.isSubmitting}>
-          {editing && (
-            <div className={styles.editBar}>
-              <label htmlFor={`week-${classId}`}>Тиждень із понеділка</label>
-              <input
-                id={`week-${classId}`}
-                type="date"
-                value={visibleWeek}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value && new Date(`${value}T12:00:00Z`).getUTCDay() === 1)
-                    void beginEdit(value);
-                  else toast("Оберіть понеділок потрібного тижня.", true);
-                }}
-              />
-              <span>У вихідні відкривається наступний тиждень.</span>
-            </div>
-          )}
           <div className={styles.days}>
             {DAYS.map((day, index) => (
               <article
                 key={day}
-                className={`${styles.day} ${today === index && visibleWeek === week ? styles.today : ""}`}
+                className={`${styles.day} ${today === index ? styles.today : ""}`}
               >
                 <h3>
                   {DAY_NAMES[index]}
-                  {today === index && visibleWeek === week && (
+                  {today === index && (
                     <span>
                       <Illustration kind="sunflower" /> Сьогодні
                     </span>

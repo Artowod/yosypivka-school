@@ -5,10 +5,6 @@ export const dateSchema = z.iso.date();
 export const scheduleSchema = z
   .object({
     classId: classIdSchema,
-    weekStart: dateSchema.refine(
-      (value) => new Date(`${value}T12:00:00Z`).getUTCDay() === 1,
-      "Оберіть понеділок",
-    ),
     entries: z
       .array(
         z

@@ -10,7 +10,6 @@ import {
 } from "../src/db/schema";
 import { CLASS_IDS, LESSON_SLOTS, type Role } from "../src/lib/constants";
 import { demoEntries, DEMO_PHOTOS } from "../src/lib/demo";
-import { weekStart } from "../src/lib/dates";
 async function main() {
   if (process.env.NODE_ENV === "production") {
     console.error(
@@ -64,7 +63,6 @@ async function main() {
             demoEntries().map((entry) => ({
               ...entry,
               classId,
-              weekStart: weekStart(),
             })),
           ),
         )
@@ -90,7 +88,7 @@ async function main() {
       if (!admin) throw new Error("SEED_FAILED");
     });
     console.info(
-      "Development classes, users, current week and shared demo photos are ready. Existing roles and schedules were preserved.",
+      "Development classes, users, schedules and shared demo photos are ready. Existing roles and schedules were preserved.",
     );
   } catch {
     console.error(

@@ -67,7 +67,6 @@ export const scheduleEntries = pgTable(
     classId: integer()
       .notNull()
       .references(() => classes.id),
-    weekStart: date().notNull(),
     dayOfWeek: dayEnum().notNull(),
     lessonNumber: integer()
       .notNull()
@@ -79,13 +78,10 @@ export const scheduleEntries = pgTable(
   (t) => [
     uniqueIndex("schedule_slot_unique").on(
       t.classId,
-      t.weekStart,
       t.dayOfWeek,
       t.lessonNumber,
     ),
-    index("schedule_class_week").on(t.classId, t.weekStart),
-    index("schedule_week").on(t.weekStart),
-    check("monday_week_start", sql`extract(isodow from ${t.weekStart}) = 1`),
+    index("schedule_class").on(t.classId),
   ],
 );
 export const photos = pgTable(

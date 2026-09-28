@@ -6,7 +6,6 @@ import { DemoStory } from "@/components/DemoStory/DemoStory";
 import { ClassSchedule } from "@/components/ClassSchedule/ClassSchedule";
 import { Illustration } from "@/components/Illustration/Illustration";
 import { getSchedule } from "@/lib/data";
-import { weekStart } from "@/lib/dates";
 import { CLASS_IDS } from "@/lib/constants";
 import { logError } from "@/lib/logging";
 import { createPageMetadata } from "@/lib/seo";
@@ -65,10 +64,9 @@ export default async function ClassPage({
   const { classId } = await params;
   if (!["1", "2", "3", "4"].includes(classId)) notFound();
   const id = Number(classId);
-  const week = weekStart();
   let schedule;
   try {
-    schedule = await getSchedule(id, week);
+    schedule = await getSchedule(id);
   } catch (error) {
     await logError("class.schedule", error);
   }
@@ -99,7 +97,7 @@ export default async function ClassPage({
         imageHeight={CLASS_PHOTO_MAIN_SIZES[classId].height}
       />
       {schedule ? (
-        <ClassSchedule classId={id} initialWeek={week} initialData={schedule} />
+        <ClassSchedule classId={id} initialData={schedule} />
       ) : (
         <section id="schedule" className="container empty">
           <Illustration kind="sunflower" />

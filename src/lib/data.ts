@@ -8,7 +8,7 @@ import { DEMO_PHOTOS, demoEntries, emptyEntries, type Photo } from "./demo";
 import { photoQuerySchema, type PhotoQuery } from "./validation";
 import { LESSON_SLOTS } from "./constants";
 
-export async function getSchedule(classId: number, week: string) {
+export async function getSchedule(classId: number) {
   if (!env.DATABASE_URL)
     return { entries: demoEntries(), demo: true, slots: LESSON_SLOTS };
   return unstable_cache(
@@ -21,12 +21,7 @@ export async function getSchedule(classId: number, week: string) {
             subject: scheduleEntries.subject,
           })
           .from(scheduleEntries)
-          .where(
-            and(
-              eq(scheduleEntries.classId, classId),
-              eq(scheduleEntries.weekStart, week),
-            ),
-          ),
+          .where(eq(scheduleEntries.classId, classId)),
         getDb().select().from(lessonSlots).orderBy(lessonSlots.lessonNumber),
       ]);
       return {
@@ -41,9 +36,9 @@ export async function getSchedule(classId: number, week: string) {
             : LESSON_SLOTS,
       };
     },
-    ["schedule", String(classId), week],
+    ["schedule", String(classId)],
     {
-      tags: [`schedule:class:${classId}:week:${week}`, `class:${classId}`],
+      tags: [`schedule:class:${classId}`, `class:${classId}`],
       revalidate: 60,
     },
   )();
