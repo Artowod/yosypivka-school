@@ -91,7 +91,7 @@ export function ClassSchedule({
       toast("Перевірте розклад: кожен урок має бути до 120 символів.", true),
   );
   const editedEntries = useWatch({ control: form.control, name: "entries" });
-  const entries = editing ? editedEntries : (data?.entries ?? []);
+  const entries = editing ? editedEntries : data?.entries ?? [];
   return (
     <section id="schedule" className={`container section ${styles.section}`}>
       <div className={styles.heading}>
@@ -108,9 +108,7 @@ export function ClassSchedule({
         )}
       </div>
       {data?.demo && (
-        <p className={styles.note}>
-          Приклад розкладу. Предмети та час уроків — тимчасове наповнення.
-        </p>
+        <p className={styles.note}>Приклад розкладу. Предмети та час уроків.</p>
       )}
       {query.isError && (
         <p role="status" className="empty">
@@ -132,7 +130,9 @@ export function ClassSchedule({
             {DAYS.map((day, index) => (
               <article
                 key={day}
-                className={`${styles.day} ${today === index ? styles.today : ""}`}
+                className={`${styles.day} ${
+                  today === index ? styles.today : ""
+                }`}
               >
                 <h3>
                   {DAY_NAMES[index]}
@@ -165,7 +165,9 @@ export function ClassSchedule({
                           <td>
                             {editing && entryIndex >= 0 ? (
                               <input
-                                aria-label={`${DAY_NAMES[index]}, урок ${lessonIndex + 1}`}
+                                aria-label={`${DAY_NAMES[index]}, урок ${
+                                  lessonIndex + 1
+                                }`}
                                 maxLength={120}
                                 {...form.register(
                                   `entries.${entryIndex}.subject`,
